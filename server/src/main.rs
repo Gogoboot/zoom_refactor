@@ -5,6 +5,7 @@ use axum::response::Response;
 use axum::routing::get;
 use axum::{Json, Router};
 use serde::Serialize;
+use signaling_server::RoomRepository;
 
 use signaling_server::{Config, ConnectionRegistry, MemoryRoomStore, Orchestrator};
 
@@ -58,7 +59,8 @@ async fn main() -> Result<(), signaling_server::AppError> {
     let app = Router::new()
         .route("/ws",           get(websocket_handler))
         .route("/health",       get(|| async { "ok" }))
-        .route("/admin/rooms",  get(admin_rooms_handler))
+        .route("/health/live",  get(health_live_handler))
+        .route("/health/ready", get(health_ready_handler))        .route("/admin/rooms",  get(admin_rooms_handler))
         .with_state(state);
 
     let listener = tokio::net::TcpListener::bind(
@@ -134,4 +136,20 @@ async fn admin_rooms_handler(
         rooms: room_infos,
         total,
     }))
+}
+
+/// Liveness probe — сервер запущен и отвечает
+async fn health_live_handler() -> &'static str {
+    "ok"
+}
+
+/// Readiness probe — сервер готов принимать запросы
+async fn health_ready_handler(
+    State(state): State<AppState>,
+) -> Result<&'static str, StatusCode> {
+    // Проверяем что хранилище доступно
+    match state.store.list().await {
+        Ok(_)  => Ok("ready"),
+        Err(_) => Err(StatusCode::SERVICE_UNAVAILABLE),
+    }
 }
