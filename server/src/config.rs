@@ -1,22 +1,17 @@
 //! Конфигурация сервера.
 //!
-//! Загружает и валидирует настройки из переменных окружения.
-//! Использует типобезопасный `enum` для уровня логирования.
-//!
 //! # Переменные окружения
 //!
-//! | Переменная | Описание | По умолчанию |
-//! |------------|----------|--------------|
-//! | `PORT` | Порт сервера | `3000` |
-//! | `LOG_LEVEL` | Уровень логирования | `debug` |
+//! | Переменная    | Описание                        | По умолчанию |
+//! |---------------|---------------------------------|--------------|
+//! | `PORT`        | Порт сервера                    | `3000`       |
+//! | `LOG_LEVEL`   | Уровень логирования             | `debug`      |
+//! | `ADMIN_TOKEN` | Токен для /admin/* endpoints    | обязателен   |
 
 use crate::error::{AppError, AppResult};
 use serde::Deserialize;
 use std::str::FromStr;
 
-/// Уровень логирования.
-///
-/// Реализует `FromStr` для ручного парсинга и `Deserialize` для `envy`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum LogLevel {
@@ -31,7 +26,6 @@ impl Default for LogLevel {
     fn default() -> Self { Self::Debug }
 }
 
-/// ✅ Реализация трейта FromStr (исправляет вашу ошибку)
 impl FromStr for LogLevel {
     type Err = String;
 
@@ -50,7 +44,6 @@ impl FromStr for LogLevel {
 }
 
 impl LogLevel {
-    /// Возвращает строковое представление для `tracing-subscriber`.
     pub fn as_str(self) -> &'static str {
         match self {
             Self::Error => "error",
@@ -62,7 +55,6 @@ impl LogLevel {
     }
 }
 
-/// Конфигурация сервера.
 #[derive(Debug, Clone, Deserialize)]
 pub struct Config {
     #[serde(default = "default_port")]
@@ -70,24 +62,32 @@ pub struct Config {
 
     #[serde(default)]
     pub log_level: LogLevel,
+
+    /// Секретный токен для доступа к /admin/* endpoints.
+    /// Обязателен — сервер не запустится без него.
+    #[serde(default)]
+    pub admin_token: String,
 }
 
-/// Дефолтное значение для `port`.
 #[inline]
 fn default_port() -> u16 { 3000 }
 
 impl Config {
-    /// Загружает конфигурацию из переменных окружения.
     pub fn from_env() -> AppResult<Self> {
         dotenvy::dotenv().ok();
 
         let config = envy::from_env::<Config>()
             .map_err(|e| AppError::Config(format!("Failed to parse config: {}", e)))?;
 
-        // Валидация: порт 0 зарезервирован ОС для автовыбора
         if config.port == 0 {
             return Err(AppError::Config(
                 "PORT cannot be 0. Use 1-65535.".to_string()
+            ));
+        }
+
+        if config.admin_token.is_empty() {
+            return Err(AppError::Config(
+                "ADMIN_TOKEN is required. Set it in .env file.".to_string()
             ));
         }
 
@@ -114,11 +114,13 @@ mod tests {
     #[test]
     fn test_port_zero_validation() {
         std::env::set_var("PORT", "0");
+        std::env::set_var("ADMIN_TOKEN", "test_token");
         std::env::remove_var("LOG_LEVEL");
         
         let result = Config::from_env();
         assert!(result.is_err());
         
         std::env::remove_var("PORT");
+        std::env::remove_var("ADMIN_TOKEN");
     }
 }

@@ -75,6 +75,7 @@ fn spawn_sender_task(
 // Вспомогательные функции (без изменений)
 // ─────────────────────────────────────────────────────────────
 /// Извлекает текст из сообщения WebSocket, если оно текстовое.
+#[allow(dead_code)]
 #[inline]
 pub fn try_extract_text(msg: &Message) -> Option<String> {
     match msg {
@@ -84,6 +85,7 @@ pub fn try_extract_text(msg: &Message) -> Option<String> {
 }
 
 /// Логирует тип входящего сообщения для отладки.
+#[allow(dead_code)]
 #[inline]
 pub fn debug_log_message(msg: &Message) {
     match msg {

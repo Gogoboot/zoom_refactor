@@ -48,4 +48,11 @@ impl RoomRepository for MemoryRoomStore {
         self.rooms.remove_if(room_id, |_, room| room.is_empty());
         Ok(())
     }
+
+    ///Аналогия — у тебя шкаф с папками (DashMap). 
+    /// list() открывает шкаф, делает ксерокопию каждой папки и складывает 
+    /// копии на стол (Vec<Room>).
+    async fn list(&self) -> Result<Vec<Room>, InfraError> {
+        Ok(self.rooms.iter().map(|r| r.value().clone()).collect())
+    }
 }

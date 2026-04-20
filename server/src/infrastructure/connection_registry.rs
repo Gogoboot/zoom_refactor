@@ -1,9 +1,9 @@
 //! Реестр активных соединений.
-use axum::extract::ws::{CloseFrame, Message};
+use axum::extract::ws::Message;
 use dashmap::DashMap;
 use std::sync::Arc;
 use tokio::sync::mpsc;
-use tracing::info;
+
 
 pub type WebSocketSender = mpsc::Sender<Message>;
 
