@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦀</text></svg>"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WebRTC Video Chat</title>
+    <link rel="stylesheet" href="/styles/main.css" />
+    <script type="module" src="/src/main.js"></script>
+  </head>
+  <body>
+    <header>
+      <div class="header-left">
+        <h1>WebRTC Video Chat</h1>
+        <p>🦀 Signaling Server на Rust</p>
+      </div>
+      <button type="button" id="themeBtn" class="btn-theme" title="Переключить тему">🌙</button>
+    </header>
+
+    <main>
+      <!-- Панель настроек сервера -->
+      <div class="config-panel">
+        <label for="serverUrlInput">🔗 Сервер сигнализации:</label>
+        <div class="input-group config-input">
+          <input type="text" id="serverUrlInput" placeholder="ws://localhost:3000" />
+          <button type="button" id="saveServerBtn" class="btn btn-small" title="Сохранить адрес сервера">💾</button>
+          <button type="button" id="connectBtn" class="btn btn-small btn-primary" title="Подключиться к серверу">🔌 Подкл.</button>
+        </div>
+        <div class="server-status" id="serverStatus">
+          <span class="dot">⚪</span> <span class="text">Ожидание...</span>
+        </div>
+      </div>
+
+      <!-- Панель управления комнатой -->
+      <section class="controls">
+        <button type="button" id="createBtn" class="btn btn-primary">➕ Создать комнату</button>
+        <div class="input-group">
+          <input type="text" id="roomIdInput" placeholder="Вставь ID комнаты сюда" />
+          <button type="button" id="copyRoomBtn" class="btn btn-small" title="Скопировать ID комнаты" disabled>📋</button>
+          <button type="button" id="joinBtn" class="btn btn-secondary">🚪 Войти</button>
+        </div>
+        <button type="button" id="leaveBtn" class="btn btn-danger" disabled>👋 Выйти</button>
+      </section>
+
+      <!-- Общая рамка: видео + чат -->
+      <div class="app-container">
+
+        <!-- Левая часть: видео -->
+        <div class="video-section">
+          <div class="video-container">
+
+            <video id="mainVideo" class="main-video" autoplay playsinline></video>
+
+            <div class="pip-overlay hidden" id="pipOverlay">
+              <video id="pipVideo" class="pip-video" autoplay playsinline muted></video>
+            </div>
+
+            <div class="volume-slider-wrapper">
+              <input type="range" id="volumeSlider" class="volume-slider" min="0" max="100" value="100" orient="vertical" title="Громкость" />
+            </div>
+
+            <div class="controls-bar">
+              <button type="button" id="micBtn"        class="btn-control" title="Вкл/Выкл микрофон"    disabled>🎤</button>
+              <button type="button" id="camBtn"        class="btn-control" title="Вкл/Выкл камеру"      disabled>📷</button>
+              <button type="button" id="hangupBtn"     class="btn-control btn-control--danger" title="Завершить звонок" disabled>📵</button>
+              <button type="button" id="swapBtn"       class="btn-control" title="Переключить экраны"   disabled>🔄</button>
+              <button type="button" id="chatToggleBtn" class="btn-control" title="Показать/скрыть чат">💬</button>
+              <button type="button" id="fullscreenBtn" class="btn-control" title="Полный экран">⛶</button>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Правая часть: чат -->
+        <div class="chat-panel hidden" id="chatPanel">
+          <div class="chat-messages" id="chatMessages">
+            <div class="chat-message chat-message--system">Чат начнётся когда собеседник подключится</div>
+          </div>
+          <div class="chat-input-group">
+            <input type="text" id="chatInput" placeholder="Напишите сообщение..." disabled />
+            <button type="button" id="chatSendBtn" class="btn btn-primary btn-small" disabled>➤</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Вкладки: логи / статистика -->
+      <div class="tabs-panel">
+        <div class="tabs-header">
+          <button type="button" class="tab-btn tab-btn--active" data-tab="logs">📋 Логи</button>
+          <button type="button" class="tab-btn" data-tab="stats">📊 Сеть</button>
+        </div>
+        <div class="tab-content" id="tab-logs">
+          <div id="statusLog" class="log-container" role="log" aria-live="polite" aria-label="Журнал событий">
+            <div class="log-item system">Ожидание действий...</div>
+          </div>
+        </div>
+        <div class="tab-content hidden" id="tab-stats">
+          <div class="stats-grid">
+            <div class="stat-item">
+              <span class="stat-label">Входящее</span>
+              <span class="stat-value" id="statInbound">— Mbps</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Исходящее</span>
+              <span class="stat-value" id="statOutbound">— Mbps</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Задержка</span>
+              <span class="stat-value" id="statRtt">— ms</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Потери</span>
+              <span class="stat-value" id="statLoss">— %</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Скрытые источники -->
+      <video id="localVideo"  class="video-hidden" autoplay playsinline muted></video>
+      <video id="remoteVideo" class="video-hidden" autoplay playsinline></video>
+    </main>
+
+    <!-- Превью -->
+    <div id="previewModal" class="modal-overlay">
+      <div class="modal-content modal-content--preview">
+        <div class="modal-header">
+          <h2>Настройка перед входом</h2>
+        </div>
+        <div class="modal-body">
+          <div class="preview-video-wrapper">
+            <video id="previewVideo" class="preview-video" autoplay playsinline muted></video>
+            <div id="previewNoCamera" class="preview-no-camera hidden">📷 Камера выключена</div>
+          </div>
+          <div class="preview-controls">
+            <button type="button" id="previewMicBtn" class="btn-control" title="Вкл/Выкл микрофон">🎤</button>
+            <button type="button" id="previewCamBtn" class="btn-control" title="Вкл/Выкл камеру">📷</button>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="previewCancelBtn" class="btn btn-danger">Отмена</button>
+          <button type="button" id="previewStartBtn" class="btn btn-primary">Начать →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Модальное окно ошибок -->
+    <div id="errorModal" class="modal-overlay">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="modalTitle">Ошибка</h2>
+          <button type="button" id="modalCloseBtn" class="close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p id="modalMessage">Произошла ошибка соединения.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="modalOkBtn" class="btn btn-primary">Понятно</button>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

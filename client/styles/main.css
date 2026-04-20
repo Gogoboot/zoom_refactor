@@ -1,0 +1,654 @@
+/* ==========================================
+   1. ПЕРЕМЕННЫЕ — ТЁМНАЯ ТЕМА (по умолчанию)
+   ========================================== */
+:root {
+    /* Фон */
+    --bg-color:      #121212;
+    --surface-color: #1e1e1e;
+    --surface-2:     #2a2a2a;
+
+    /* Текст */
+    --text-color:    #ffffff;
+    --text-muted:    #a0a0a0;
+
+    /* Акценты */
+    --primary-color:   #E8834A; /* оранжевый */
+    --secondary-color: #4A7C59; /* тёмно-зелёный */
+    --danger-color:    #ff4d4d;
+    --warning-color:   #FFC107;
+
+    /* Рамки и тени */
+    --border-color:    rgba(255,255,255,0.08);
+    --shadow-sm:       0 2px 8px rgba(0,0,0,0.3);
+    --shadow-md:       0 4px 16px rgba(0,0,0,0.4);
+    --shadow-lg:       0 8px 32px rgba(0,0,0,0.5);
+
+    /* Форма */
+    --border-radius:   12px;
+    --border-radius-sm: 8px;
+    --border-radius-lg: 20px;
+
+    /* Высота controls-bar */
+    --controls-bar-height: 60px;
+
+    /* Ширина чата */
+    --chat-width: 300px;
+}
+
+/* ==========================================
+   1.1 СВЕТЛАЯ ТЕМА "КОФЕ С МОЛОКОМ"
+   ========================================== */
+body.theme-light {
+    --bg-color:      #FDFAF5;
+    --surface-color: #F0E8D8;
+    --surface-2:     #E8DCC8;
+
+    --text-color:    #3D2B1F;
+    --text-muted:    #8B7355;
+
+    --primary-color:   #6ECFB5; /* мятный */
+    --secondary-color: #8B6348; /* кофейный */
+    --danger-color:    #E05C5C;
+    --warning-color:   #D4A017;
+
+    --border-color:    rgba(61,43,31,0.12);
+    --shadow-sm:       0 2px 8px rgba(61,43,31,0.1);
+    --shadow-md:       0 4px 16px rgba(61,43,31,0.15);
+    --shadow-lg:       0 8px 32px rgba(61,43,31,0.2);
+}
+
+/* ==========================================
+   2. СБРОС И БАЗОВЫЕ НАСТРОЙКИ
+   ========================================== */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+/* ==========================================
+   3. ШАПКА
+   ========================================== */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 1200px;
+    padding: 20px 20px 10px;
+}
+
+.header-left h1 {
+    font-size: 1.8rem;
+    margin-bottom: 2px;
+}
+
+.header-left p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+/* Кнопка переключения темы */
+.btn-theme {
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-theme:hover { transform: scale(1.1); }
+
+main {
+    width: 100%;
+    max-width: 1200px;
+    padding: 0 20px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* ==========================================
+   4. ПАНЕЛЬ НАСТРОЕК СЕРВЕРА
+   ========================================== */
+.config-panel {
+    background: var(--surface-color);
+    padding: 15px;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+}
+
+.config-panel label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    display: block;
+    margin-bottom: 5px;
+}
+
+.config-input {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 5px;
+}
+
+.config-input input { flex-grow: 1; }
+
+.server-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 5px;
+}
+
+.server-status .dot { font-size: 1.2rem; }
+.status-connected .dot  { color: var(--primary-color); }
+.status-connecting .dot { color: var(--warning-color); }
+.status-error .dot      { color: var(--danger-color); }
+
+/* ==========================================
+   5. ПАНЕЛЬ УПРАВЛЕНИЯ КОМНАТОЙ
+   ========================================== */
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    background: var(--surface-color);
+    padding: 16px;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+}
+
+.input-group {
+    display: flex;
+    gap: 5px;
+}
+
+input[type="text"] {
+    padding: 10px 15px;
+    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--border-color);
+    background: var(--surface-2);
+    color: var(--text-color);
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+input[type="text"]:focus {
+    border-color: var(--primary-color);
+}
+
+/* ==========================================
+   6. КНОПКИ
+   ========================================== */
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: var(--border-radius-sm);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s, box-shadow 0.2s;
+    box-shadow: var(--shadow-sm);
+}
+
+.btn:hover  { opacity: 0.9; box-shadow: var(--shadow-md); }
+.btn:active { transform: scale(0.98); }
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: grayscale(1);
+    box-shadow: none;
+}
+
+.btn-primary   { background: var(--primary-color);   color: white; }
+.btn-secondary { background: var(--secondary-color); color: white; }
+.btn-danger    { background: var(--danger-color);     color: white; }
+.btn-small     { padding: 8px 12px; font-size: 0.9rem; }
+
+/* ==========================================
+   7. ОБЩАЯ РАМКА (видео + чат)
+   ========================================== */
+.app-container {
+    display: flex;
+    flex-direction: row;
+    gap: 0;
+    background: var(--surface-color);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+}
+
+.video-section {
+    flex: 1;
+    min-width: 0; /* важно для flex — не даёт видео распирать контейнер */
+}
+
+/* ==========================================
+   8. ВИДЕО РАСКЛАДКА (Main + PiP)
+   ========================================== */
+.video-hidden { display: none; }
+
+.video-container {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: #000;
+    overflow: hidden;
+}
+
+.main-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* PiP */
+.pip-overlay {
+    position: absolute;
+    bottom: calc(var(--controls-bar-height) + 10px);
+    right: 16px;
+    width: 180px;
+    height: 100px;
+    border: 2px solid rgba(255,255,255,0.85);
+    border-radius: var(--border-radius-sm);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    cursor: pointer;
+    transition: transform 0.2s;
+    background: #111;
+}
+
+.pip-overlay:hover  { transform: scale(1.05); }
+.pip-overlay.hidden { display: none; }
+
+.pip-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* ==========================================
+   9. СЛАЙДЕР ГРОМКОСТИ
+   ========================================== */
+.volume-slider-wrapper {
+    position: absolute;
+    left: 16px;
+    bottom: calc(var(--controls-bar-height) + 10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(20,20,20,0.75);
+    backdrop-filter: blur(8px);
+    border-radius: 20px;
+    padding: 12px 8px;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.volume-slider {
+    writing-mode: vertical-lr;
+    direction: rtl;
+    width: 6px;
+    height: 80px;
+    cursor: pointer;
+    accent-color: var(--primary-color);
+}
+
+/* ==========================================
+   10. CONTROLS BAR
+   ========================================== */
+.controls-bar {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(20,20,20,0.85);
+    backdrop-filter: blur(8px);
+    padding: 8px 16px;
+    border-radius: 30px;
+    display: flex;
+    gap: 10px;
+    border: 1px solid rgba(255,255,255,0.1);
+    height: var(--controls-bar-height);
+    align-items: center;
+}
+
+.btn-control {
+    background: rgba(255,255,255,0.15);
+    border: none;
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.btn-control:hover:not(:disabled) {
+    background: rgba(255,255,255,0.25);
+    transform: scale(1.1);
+}
+
+.btn-control.muted       { background: var(--danger-color); }
+.btn-control.active      { background: var(--primary-color); }
+.btn-control--danger     { background: var(--danger-color); }
+.btn-control--danger:hover:not(:disabled) { background: #ff2020; }
+
+.btn-control:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* ==========================================
+   11. ПАНЕЛЬ ЧАТА
+   ========================================== */
+.chat-panel {
+    width: var(--chat-width);
+    min-width: var(--chat-width);
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid var(--border-color);
+    background: var(--surface-color);
+    transition: width 0.3s;
+}
+
+.chat-panel.hidden {
+    display: none;
+}
+
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 0;
+}
+
+/* Сообщение собеседника */
+.chat-message {
+    max-width: 85%;
+    padding: 8px 12px;
+    border-radius: 12px 12px 12px 4px;
+    background: var(--surface-2);
+    font-size: 0.9rem;
+    align-self: flex-start;
+}
+
+/* Моё сообщение */
+.chat-message--own {
+    background: var(--primary-color);
+    color: white;
+    border-radius: 12px 12px 4px 12px;
+    align-self: flex-end;
+}
+
+/* Системное сообщение */
+.chat-message--system {
+    background: none;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    text-align: center;
+    align-self: center;
+}
+
+.chat-message-meta {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 2px;
+}
+
+.chat-message--own .chat-message-meta {
+    text-align: right;
+    color: rgba(255,255,255,0.7);
+}
+
+.chat-input-group {
+    display: flex;
+    gap: 8px;
+    padding: 12px;
+    border-top: 1px solid var(--border-color);
+}
+
+.chat-input-group input {
+    flex: 1;
+    font-size: 0.9rem;
+}
+
+/* ==========================================
+   12. ВКЛАДКИ (Логи / Статистика)
+   ========================================== */
+.tabs-panel {
+    background: var(--surface-color);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.tabs-header {
+    display: flex;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--surface-2);
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    background: none;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.2s;
+    border-bottom: 2px solid transparent;
+}
+
+.tab-btn:hover { color: var(--text-color); }
+
+.tab-btn--active {
+    color: var(--primary-color);
+    border-bottom: 2px solid var(--primary-color);
+}
+
+.tab-content { padding: 10px; }
+.tab-content.hidden { display: none; }
+
+/* Логи */
+.log-container {
+    max-height: 20vh;
+    min-height: 80px;
+    overflow-y: auto;
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    padding: 10px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.85rem;
+}
+
+.log-item          { margin-bottom: 4px; }
+.log-item.error    { color: var(--danger-color); }
+.log-item.system   { color: var(--text-muted); }
+
+/* Статистика сети */
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.stat-item {
+    background: var(--surface-2);
+    padding: 12px;
+    border-radius: var(--border-radius-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.stat-label { font-size: 0.8rem; color: var(--text-muted); }
+.stat-value { font-size: 1.1rem; font-weight: 600; color: var(--primary-color); }
+
+/* ==========================================
+   13. МОДАЛЬНЫЕ ОКНА
+   ========================================== */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(5px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: var(--surface-color);
+    padding: 25px;
+    border-radius: var(--border-radius);
+    width: 90%;
+    max-width: 400px;
+    box-shadow: var(--shadow-lg);
+    text-align: center;
+    animation: popIn 0.3s ease-out;
+    border: 1px solid var(--border-color);
+}
+
+.modal-content--preview { max-width: 500px; }
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.modal-body p { margin-bottom: 20px; font-size: 1.1rem; }
+
+.modal-footer {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+@keyframes popIn {
+    from { transform: scale(0.8); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
+}
+
+/* ==========================================
+   14. ПРЕВЬЮ ПЕРЕД ВХОДОМ
+   ========================================== */
+.preview-video-wrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: #000;
+    border-radius: var(--border-radius-sm);
+    overflow: hidden;
+    margin-bottom: 16px;
+}
+
+.preview-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1);
+}
+
+.preview-no-camera {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--text-muted);
+    font-size: 1.1rem;
+}
+
+.preview-controls {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 8px;
+}
+
+/* ==========================================
+   15. АДАПТИВНОСТЬ
+   ========================================== */
+@media (max-width: 768px) {
+    .app-container {
+        flex-direction: column; /* чат снизу на телефоне */
+    }
+
+    .chat-panel {
+        width: 100%;
+        min-width: 0;
+        border-left: none;
+        border-top: 1px solid var(--border-color);
+        max-height: 300px;
+    }
+
+    .controls      { flex-direction: column; }
+    .config-input  { flex-direction: column; }
+    .pip-overlay   { width: 120px; height: 68px; right: 10px; }
+    .btn-control   { width: 38px; height: 38px; font-size: 1rem; }
+    .stats-grid    { grid-template-columns: 1fr 1fr; }
+
+    header { padding: 15px 15px 5px; }
+    .header-left h1 { font-size: 1.4rem; }
+}
+
+/* ==========================================
+   16. ДОСТУПНОСТЬ
+   ========================================== */
+button:focus-visible,
+input:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(232,131,74,0.2);
+}
