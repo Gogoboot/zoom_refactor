@@ -575,5 +575,3 @@ initTheme();
 videoLayout.reset();
 controls.reset();
 chat.reset();
-// Автоподключение при загрузке страницы
-ws.connect(els.serverUrlInput.value.trim());
