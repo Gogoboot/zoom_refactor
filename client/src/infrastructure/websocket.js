@@ -3,7 +3,7 @@
  * Знает КАК отправлять сообщения, не знает о бизнес-логике
  */
 
-const DEFAULT_WS = 'ws://localhost:3000/ws';
+const DEFAULT_WS = 'wss://meet.gohub.su/ws';
 const MAX_RECONNECT_ATTEMPTS = 10;
 const MAX_RECONNECT_DELAY = 30000;
 
