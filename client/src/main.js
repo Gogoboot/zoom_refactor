@@ -553,7 +553,7 @@ els.errorModal.addEventListener('click', (e) => {
 // ==========================================
 // 15. ПАНЕЛЬ СЕРВЕРА
 // ==========================================
-els.serverUrlInput.value = storage.get('ws_server_url', 'ws://localhost:3000/ws');
+els.serverUrlInput.value = storage.get('ws_server_url', 'wss://meet.gohub.su/ws');
 
 els.saveServerBtn.addEventListener('click', () => {
     const url = els.serverUrlInput.value.trim();
