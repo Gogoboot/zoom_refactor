@@ -618,11 +618,42 @@ input[type="text"]:focus {
 }
 
 /* ==========================================
-   15. АДАПТИВНОСТЬ
+   15. НАСТРОЙКИ (вкладка)
+   ========================================== */
+.settings-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 5px;
+}
+
+.settings-panel label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.settings-input-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.settings-input-group input {
+    flex: 1;
+    min-width: 0; /* важно для flex — не даёт input распирать контейнер */
+}
+
+.settings-input-group .btn {
+    flex-shrink: 0; /* кнопки не сжимаются */
+    white-space: nowrap;
+}
+
+/* ==========================================
+   16. АДАПТИВНОСТЬ
    ========================================== */
 @media (max-width: 768px) {
     .app-container {
-        flex-direction: column; /* чат снизу на телефоне */
+        flex-direction: column;
     }
 
     .chat-panel {
@@ -633,8 +664,12 @@ input[type="text"]:focus {
         max-height: 300px;
     }
 
+    /* Скрываем слайдер громкости на мобильном */
+    .volume-slider-wrapper {
+        display: none;
+    }
+
     .controls      { flex-direction: column; }
-    .config-input  { flex-direction: column; }
     .pip-overlay   { width: 120px; height: 68px; right: 10px; }
     .btn-control   { width: 38px; height: 38px; font-size: 1rem; }
     .stats-grid    { grid-template-columns: 1fr 1fr; }
@@ -644,7 +679,7 @@ input[type="text"]:focus {
 }
 
 /* ==========================================
-   16. ДОСТУПНОСТЬ
+   17. ДОСТУПНОСТЬ
    ========================================== */
 button:focus-visible,
 input:focus-visible {
