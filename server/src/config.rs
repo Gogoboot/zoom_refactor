@@ -7,6 +7,8 @@
 //! | `PORT`        | Порт сервера                    | `3000`       |
 //! | `LOG_LEVEL`   | Уровень логирования             | `debug`      |
 //! | `ADMIN_TOKEN` | Токен для /admin/* endpoints    | обязателен   |
+//! | `TURN_SECRET` | Секрет для TURN credentials     | обязателен   |
+//! | `DOMAIN`      | Домен сервера                   | `gohub.su`   |
 
 use crate::error::{AppError, AppResult};
 use serde::Deserialize;
@@ -67,10 +69,19 @@ pub struct Config {
     /// Обязателен — сервер не запустится без него.
     #[serde(default)]
     pub admin_token: String,
+
+    #[serde(default = "default_domain")]
+    pub domain: String,
+
+    pub turn_secret: String,
 }
 
 #[inline]
 fn default_port() -> u16 { 3000 }
+
+fn default_domain() -> String {
+    "gohub.su".to_string()
+}
 
 impl Config {
     pub fn from_env() -> AppResult<Self> {
@@ -88,6 +99,12 @@ impl Config {
         if config.admin_token.is_empty() {
             return Err(AppError::Config(
                 "ADMIN_TOKEN is required. Set it in .env file.".to_string()
+            ));
+        }
+
+        if config.turn_secret.is_empty() {
+            return Err(AppError::Config(
+                "TURN_SECRET is required. Set it in .env file.".to_string()
             ));
         }
 

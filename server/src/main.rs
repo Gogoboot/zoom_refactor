@@ -29,6 +29,8 @@ struct AppState {
     orchestrator: Orchestrator<MemoryRoomStore>,
     store:        MemoryRoomStore,
     admin_token:  String,
+    turn_secret: String,
+    domain:      String,
 }
 
 #[tokio::main]
@@ -53,6 +55,8 @@ async fn main() -> Result<(), signaling_server::AppError> {
         orchestrator:  orchestrator.clone(),
         store:         store.clone(),
         admin_token:   config.admin_token.clone(),
+        turn_secret:   config.turn_secret.clone(),
+        domain:        config.domain.clone(),
     };
 
     // 5. Сборка приложения
@@ -60,7 +64,9 @@ async fn main() -> Result<(), signaling_server::AppError> {
         .route("/ws",           get(websocket_handler))
         .route("/health",       get(|| async { "ok" }))
         .route("/health/live",  get(health_live_handler))
-        .route("/health/ready", get(health_ready_handler))        .route("/admin/rooms",  get(admin_rooms_handler))
+        .route("/health/ready", get(health_ready_handler))        
+        .route("/admin/rooms",  get(admin_rooms_handler))
+        .route("/api/ice-servers", get(ice_servers_handler))
         .with_state(state);
 
     let listener = tokio::net::TcpListener::bind(
@@ -152,4 +158,42 @@ async fn health_ready_handler(
         Ok(_)  => Ok("ready"),
         Err(_) => Err(StatusCode::SERVICE_UNAVAILABLE),
     }
+}
+
+/// ICE servers handler — возвращает STUN/TURN credentials
+async fn ice_servers_handler(
+    State(state): State<AppState>,
+) -> Json<serde_json::Value> {
+    use hmac::{Hmac, Mac};
+    use sha1::Sha1;
+    use base64::{Engine, engine::general_purpose::STANDARD};
+
+    let ttl = 3600u64;
+    let timestamp = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap()
+        .as_secs() + ttl;
+
+    let username = format!("{}:user", timestamp);
+
+    let mut mac = Hmac::<Sha1>::new_from_slice(state.turn_secret.as_bytes()).unwrap();
+    mac.update(username.as_bytes());
+    let password = STANDARD.encode(mac.finalize().into_bytes());
+
+    Json(serde_json::json!({
+        "iceServers": [
+            {
+                "urls": format!("stun:{}:3478", state.domain)
+            },
+            {
+                "urls": [
+                    format!("turn:{}:3478?transport=udp", state.domain),
+                    format!("turn:{}:3478?transport=tcp", state.domain),
+                    format!("turns:{}:5349?transport=tcp", state.domain),
+                ],
+                "username": username,
+                "credential": password
+            }
+        ]
+    }))
 }

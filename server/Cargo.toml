@@ -17,8 +17,12 @@ futures-util = "0.3"
 uuid = { version = "1", features = ["v4"] }
 async-trait = "0.1"
 envy = "0.4"
+hmac = "0.12"
+sha1 = "0.10"
+base64 = "0.22"
 
 [dev-dependencies]
 mockall = "0.12"
 tokio-test = "0.4"
+
 
