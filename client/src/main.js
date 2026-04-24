@@ -367,7 +367,7 @@ function handleReset() {
 // ==========================================
 // 8. ОБРАБОТЧИКИ КНОПОК КОМНАТЫ
 // ==========================================
-preview.onStart(({ stream, micEnabled, camEnabled }) => {
+preview.onStart(async ({ stream, micEnabled, camEnabled }) => {
     const audioTrack = stream.getAudioTracks()[0];
     const videoTrack = stream.getVideoTracks()[0];
     if (audioTrack) audioTrack.enabled = micEnabled;
