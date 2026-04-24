@@ -201,7 +201,7 @@ function enableRoomButtons(isInRoom) {
 let webrtc = null;
 let remoteParticipantId = null;
 
-function initWebRTC() {
+await function initWebRTC() {
     webrtc = createWebRTCAdapter({
         onRemoteStream: (stream) => {
             els.remoteVideo.srcObject = stream;
@@ -382,7 +382,7 @@ preview.onStart(({ stream, micEnabled, camEnabled }) => {
 
     videoLayout.update(state.get());
 
-    initWebRTC();
+    await initWebRTC();
     webrtc.addTracks(stream);
 
     const { pendingAction, room } = state.get();
