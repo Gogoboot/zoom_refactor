@@ -22,13 +22,13 @@ export function createWebRTCAdapter({ onRemoteStream, onIceCandidate, onDataMess
     let dataChannel = null;
     let iceCandidateBuffer = [];
 
-    function init() {
+    async function init() {
         // Защита от двойного вызова
         if (pc) { pc.close(); pc = null; }
 
         const iceServers = await fetchIceServers();
         pc = new RTCPeerConnection({ iceServers });
-        
+
         // DataChannel — создаёт тот кто делает offer
         dataChannel = pc.createDataChannel('chat');
         setupDataChannel(dataChannel);
