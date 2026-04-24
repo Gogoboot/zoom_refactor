@@ -3,14 +3,19 @@
  * Управляет PeerConnection и DataChannel
  */
 
-const ICE_SERVERS = [
-    { urls: 'stun:stun.l.google.com:19302' },
-    {
-        urls: 'turn:openrelay.metered.ca:80',
-        username: 'openrelayproject',
-        credential: 'openrelayproject',
-    },
-];
+const ICE_SERVERS_URL = 'https://gohub.su/api/ice-servers';
+
+async function fetchIceServers() {
+    try {
+        const res = await fetch(ICE_SERVERS_URL);
+        if (!res.ok) throw new Error('Failed to fetch ICE servers');
+        const data = await res.json();
+        return data.iceServers;
+    } catch (e) {
+        console.warn('Не удалось получить ICE серверы, используем fallback:', e);
+        return [{ urls: 'stun:stun.l.google.com:19302' }];
+    }
+}
 
 export function createWebRTCAdapter({ onRemoteStream, onIceCandidate, onDataMessage, onConnectionState }) {
     let pc = null;
@@ -21,8 +26,9 @@ export function createWebRTCAdapter({ onRemoteStream, onIceCandidate, onDataMess
         // Защита от двойного вызова
         if (pc) { pc.close(); pc = null; }
 
-        pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
-
+        const iceServers = await fetchIceServers();
+        pc = new RTCPeerConnection({ iceServers });
+        
         // DataChannel — создаёт тот кто делает offer
         dataChannel = pc.createDataChannel('chat');
         setupDataChannel(dataChannel);
