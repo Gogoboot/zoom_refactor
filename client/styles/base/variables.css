@@ -1,5 +1,6 @@
 /* ==========================================
    ТЕМЫ — переключаются через data-theme
+   variables.css
    ========================================== */
 
 [data-theme="dark"] {
@@ -17,6 +18,7 @@
     --radius:        12px;
     --radius-sm:     8px;
     --radius-lg:     20px;
+    --bg-glass: rgba(0, 0, 0, 0.4);
 }
 
 [data-theme="glass"] {
@@ -34,6 +36,7 @@
     --radius:        12px;
     --radius-sm:     8px;
     --radius-lg:     20px;
+    --bg-glass: rgba(255, 255, 255, 0.08);
 }
 
 [data-theme="light"] {
@@ -51,4 +54,5 @@
     --radius:        12px;
     --radius-sm:     8px;
     --radius-lg:     20px;
+    --bg-glass: rgba(255, 255, 255, 0.6);
 }

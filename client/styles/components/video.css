@@ -101,8 +101,8 @@
   left: 50%;
   transform: translateX(-50%);
 
-  background: rgba(0, 0, 0, 0.4); /* 👈 ВОТ ЭТО */
-  
+  background: var(--bg-glass);
+
   border: 1px solid rgba(255,255,255,0.15);
   backdrop-filter: blur(12px);
 
