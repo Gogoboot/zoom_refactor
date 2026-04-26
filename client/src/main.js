@@ -529,7 +529,12 @@ controls.onSwapClick(() => {
   );
 });
 
-controls.onChatToggleClick(() => chat.toggle());
+controls.onChatToggleClick(() => {
+    chat.toggle();
+
+    els.appContainer.classList.toggle('chat-open');
+});
+
 // По клику на шестерёнку — открываем/закрываем drawer
 controls.onDrawerClick(() => drawer.toggle());
 

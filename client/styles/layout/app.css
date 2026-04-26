@@ -42,23 +42,39 @@ body {
    МОБИЛЬНЫЙ LAYOUT — до 768px
    ========================================== */
 @media (max-width: 768px) {
-/* Убираем все отступы — видео до краёв экрана */
-    .app {
-        padding: 0;
-        gap: 0;
-    }
+  /* Убираем все отступы — видео до краёв экрана */
+  .app {
+    padding: 0;
+    gap: 0;
+  }
 
-    /* Убираем отступы у панели комнаты */
-    .room-controls {
-        border-radius: 0;
-        border-left: none;
-        border-right: none;
-        border-top: none;
-    }
+  /* Убираем отступы у панели комнаты */
+  .room-controls {
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+  }
 
-    /* app-container — без отступов и рамок */
-    .app-container {
-        border-radius: 0;
-        border: none;
-    }
+  /* app-container — без отступов и рамок */
+  .app-container {
+    border-radius: 0;
+    border: none;
+  }
+
+  .app-container.chat-open {
+    flex-direction: column;
+  }
+
+  .app-container.chat-open .video-section {
+    flex: 0 0 60%;
+    min-height: 0;
+  }
+
+  .app-container.chat-open .chat-panel {
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 40%;
+    min-height: 0;
+  }
 }
