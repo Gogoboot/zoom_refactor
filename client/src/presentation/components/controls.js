@@ -2,6 +2,9 @@
  * controls.js — Компонент кнопок управления звонком
  */
 
+/* Иконки для переключения состояния */
+import { iconMic, iconMicOff, iconVideo, iconVideoOff, iconMaximize, iconMinimize } from '../../infrastructure/icons.js';
+
 export function createControlsComponent({
     micBtn,
     camBtn,
@@ -9,16 +12,21 @@ export function createControlsComponent({
     swapBtn,
     fullscreenBtn,
     chatToggleBtn,
+    drawerBtn,        // кнопка открытия drawer (шестерёнка)
     volumeSlider,
     mainVideo,
 }) {
 
     function setMicState(enabled) {
-        micBtn.classList.toggle('muted', !enabled);
+        micBtn.classList.toggle('btn-control--muted', !enabled);
+        micBtn.innerHTML = '';
+        micBtn.appendChild(enabled ? iconMic() : iconMicOff());
     }
 
     function setCamState(enabled) {
-        camBtn.classList.toggle('muted', !enabled);
+        camBtn.classList.toggle('btn-control--muted', !enabled);
+        camBtn.innerHTML = '';
+        camBtn.appendChild(enabled ? iconVideo() : iconVideoOff());
     }
 
     function enableMediaControls(enabled) {
@@ -50,17 +58,21 @@ export function createControlsComponent({
     function onChatToggleClick(callback) {
         chatToggleBtn.addEventListener('click', callback);
     }
+    // Вешаем обработчик на кнопку drawer (шестерёнка)
+    function onDrawerClick(callback) {
+        drawerBtn.addEventListener('click', callback);
+    }
 
     function onFullscreenClick(appContainer) {
         fullscreenBtn.addEventListener('click', () => {
             if (!document.fullscreenElement) {
                 appContainer.requestFullscreen();
-                fullscreenBtn.textContent = '✕';
-                fullscreenBtn.title = 'Выйти из полного экрана';
+                fullscreenBtn.innerHTML = '';
+                fullscreenBtn.appendChild(iconMinimize());
             } else {
                 document.exitFullscreen();
-                fullscreenBtn.textContent = '⛶';
-                fullscreenBtn.title = 'Полный экран';
+                fullscreenBtn.innerHTML = '';
+                fullscreenBtn.appendChild(iconMaximize());
             }
         });
     }
@@ -72,8 +84,8 @@ export function createControlsComponent({
     }
 
     function reset() {
-        micBtn.classList.remove('muted');
-        camBtn.classList.remove('muted');
+        micBtn.classList.remove('btn-control--muted');
+        camBtn.classList.remove('btn-control--muted');
         enableMediaControls(false);
         enableCallControls(false);
     }
@@ -88,6 +100,7 @@ export function createControlsComponent({
         onHangupClick,
         onSwapClick,
         onChatToggleClick,
+        onDrawerClick, 
         onFullscreenClick,
         onVolumeChange,
         reset,

@@ -1,0 +1,64 @@
+/* ==========================================
+   ОСНОВНОЙ LAYOUT — 100vh без скролла
+   ========================================== */
+body {
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  padding: 12px 20px;
+  gap: 10px;
+  overflow: hidden;
+}
+
+/* Видео + чат — занимают всё оставшееся место */
+.app-container {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  background: var(--bg-secondary);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.video-section {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ==========================================
+   МОБИЛЬНЫЙ LAYOUT — до 768px
+   ========================================== */
+@media (max-width: 768px) {
+/* Убираем все отступы — видео до краёв экрана */
+    .app {
+        padding: 0;
+        gap: 0;
+    }
+
+    /* Убираем отступы у панели комнаты */
+    .room-controls {
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+        border-top: none;
+    }
+
+    /* app-container — без отступов и рамок */
+    .app-container {
+        border-radius: 0;
+        border: none;
+    }
+}

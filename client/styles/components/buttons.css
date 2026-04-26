@@ -1,0 +1,115 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition:
+    opacity 0.2s,
+    transform 0.1s,
+    box-shadow 0.2s;
+  box-shadow: var(--shadow);
+}
+
+.btn:hover:not(:disabled) {
+  opacity: 0.9;
+  box-shadow: var(--shadow);
+  transform: translateY(-1px);
+}
+
+.btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: white;
+}
+
+.btn-secondary {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: white;
+}
+
+.btn-sm {
+  padding: 7px 14px;
+  font-size: 0.85rem;
+}
+
+/* Круглые кнопки controls-bar */
+.btn-control {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background 0.2s,
+    transform 0.2s;
+}
+
+.btn-control:hover:not(:disabled) {
+  background: var(--bg-secondary);
+  transform: scale(1.1);
+}
+
+.btn-control:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-control--active {
+  background: var(--accent);
+  color: white;
+}
+.btn-control--muted {
+  background: var(--danger);
+  color: white;
+}
+.btn-control--danger {
+  background: var(--danger);
+  color: white;
+}
+.btn-control--danger:hover:not(:disabled) {
+  background: #ff2020;
+}
+
+/* ==========================================
+   МОБИЛЬНЫЕ КНОПКИ — крупнее для пальца
+   ========================================== */
+@media (max-width: 768px) {
+  /* Круглые кнопки controls-bar — крупнее */
+  .btn-control {
+    width: 52px;
+    height: 52px;
+  }
+
+  /* Обычные кнопки — чуть компактнее */
+  .btn {
+    padding: 8px 14px;
+    font-size: 0.88rem;
+  }
+
+  /* Маленькие кнопки */
+  .btn-sm {
+    padding: 6px 10px;
+    font-size: 0.8rem;
+  }
+}

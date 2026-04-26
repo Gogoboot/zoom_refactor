@@ -1,140 +1,321 @@
 <!doctype html>
-<html lang="ru">
+<html lang="ru" data-theme="glass">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GoMeet</title>
     <link
       rel="icon"
-      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦀</text></svg>"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎥</text></svg>"
     />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>WebRTC Video Chat</title>
     <link rel="stylesheet" href="/styles/main.css" />
     <script type="module" src="/src/main.js"></script>
   </head>
   <body>
-    <header>
-      <div class="header-left">
-        <h1>WebRTC Video Chat</h1>
-        <p>🦀 Signaling Server на Rust</p>
+    <!-- ШАПКА -->
+    <header class="header">
+      <div class="header-logo">
+        <h1>GoMeet</h1>
+        <span>powered by Rust</span>
       </div>
-      <button type="button" id="themeBtn" class="btn-theme" title="Переключить тему">🌙</button>
+      <div class="header-actions">
+        <!-- Статус сервера -->
+        <div class="server-status" id="serverStatus">
+          <span class="dot">⚪</span>
+          <span class="text">Ожидание...</span>
+        </div>
+        <!-- Переключатель тем -->
+        <div class="theme-switcher">
+          <button
+            class="theme-btn theme-btn--dark"
+            data-theme="dark"
+            title="Тёмная"
+          ></button>
+          <button
+            class="theme-btn theme-btn--glass"
+            data-theme="glass"
+            title="Стеклянная"
+          ></button>
+          <button
+            class="theme-btn theme-btn--light"
+            data-theme="light"
+            title="Светлая"
+          ></button>
+        </div>
+      </div>
     </header>
 
-    <main>
-      <!-- Панель управления комнатой -->
-      <section class="controls">
-        <button type="button" id="createBtn" class="btn btn-primary">➕ Создать комнату</button>
-        <div class="input-group">
-          <input type="text" id="roomIdInput" placeholder="Вставь ID комнаты сюда" />
-          <button type="button" id="copyRoomBtn" class="btn btn-small" title="Скопировать ID комнаты" disabled>📋</button>
-          <button type="button" id="joinBtn" class="btn btn-secondary">🚪 Войти</button>
+    <main class="app">
+      <!-- ПАНЕЛЬ КОМНАТЫ -->
+      <section class="room-controls">
+        <div class="room-controls-group">
+          <button type="button" id="createBtn" class="btn btn-primary">
+            Создать комнату
+          </button>
         </div>
-        <button type="button" id="leaveBtn" class="btn btn-danger" disabled>👋 Выйти</button>
+        <div class="room-controls-group">
+          <input
+            type="text"
+            id="roomIdInput"
+            placeholder="ID или ссылка на комнату"
+          />
+          <button
+            type="button"
+            id="copyRoomBtn"
+            class="btn btn-secondary btn-sm"
+            title="Скопировать ссылку"
+            disabled
+          >
+            Копировать
+          </button>
+          <button type="button" id="joinBtn" class="btn btn-secondary">
+            Войти
+          </button>
+        </div>
+        <div class="room-controls-group">
+          <button type="button" id="leaveBtn" class="btn btn-danger" disabled>
+            Выйти
+          </button>
+        </div>
       </section>
 
-      <!-- Общая рамка: видео + чат -->
+      <!-- ВИДЕО + ЧАТ -->
       <div class="app-container">
-
-        <!-- Левая часть: видео -->
+        <!-- ВИДЕО -->
         <div class="video-section">
           <div class="video-container">
+            <video
+              id="mainVideo"
+              class="main-video"
+              autoplay
+              playsinline
+            ></video>
 
-            <video id="mainVideo" class="main-video" autoplay playsinline></video>
-
+            <!-- PiP — второй участник -->
             <div class="pip-overlay hidden" id="pipOverlay">
-              <video id="pipVideo" class="pip-video" autoplay playsinline muted></video>
+              <video
+                id="pipVideo"
+                class="pip-video"
+                autoplay
+                playsinline
+                muted
+              ></video>
             </div>
 
-            <!-- Слайдер громкости — скрыт на мобильном -->
+            <!-- Громкость -->
             <div class="volume-slider-wrapper">
-              <input type="range" id="volumeSlider" class="volume-slider" min="0" max="100" value="100" orient="vertical" title="Громкость" />
+              <input
+                type="range"
+                id="volumeSlider"
+                class="volume-slider"
+                min="0"
+                max="100"
+                value="100"
+                orient="vertical"
+                title="Громкость"
+              />
             </div>
 
+            <!-- Controls bar -->
             <div class="controls-bar">
-              <button type="button" id="micBtn"        class="btn-control" title="Вкл/Выкл микрофон"    disabled>🎤</button>
-              <button type="button" id="camBtn"        class="btn-control" title="Вкл/Выкл камеру"      disabled>📷</button>
-              <button type="button" id="hangupBtn"     class="btn-control btn-control--danger" title="Завершить звонок" disabled>📵</button>
-              <button type="button" id="swapBtn"       class="btn-control" title="Переключить экраны"   disabled>🔄</button>
-              <button type="button" id="chatToggleBtn" class="btn-control" title="Показать/скрыть чат">💬</button>
-              <button type="button" id="fullscreenBtn" class="btn-control" title="Полный экран">⛶</button>
+              <button
+                type="button"
+                id="micBtn"
+                class="btn-control"
+                title="Микрофон"
+                disabled
+              ></button>
+              <button
+                type="button"
+                id="camBtn"
+                class="btn-control"
+                title="Камера"
+                disabled
+              ></button>
+              <button
+                type="button"
+                id="hangupBtn"
+                class="btn-control btn-control--danger"
+                title="Завершить"
+                disabled
+              ></button>
+              <button
+                type="button"
+                id="swapBtn"
+                class="btn-control"
+                title="Переключить"
+                disabled
+              ></button>
+              <button
+                type="button"
+                id="chatToggleBtn"
+                class="btn-control"
+                title="Чат"
+              ></button>
+              <button
+                type="button"
+                id="fullscreenBtn"
+                class="btn-control"
+                title="Полный экран"
+              ></button>
+              <!-- Кнопка открытия drawer — логи и настройки -->
+              <button
+                type="button"
+                id="drawerBtn"
+                class="btn-control"
+                title="Логи и настройки"
+              ></button>
             </div>
-
           </div>
         </div>
 
-        <!-- Правая часть: чат -->
+        <!-- ЧАТ -->
         <div class="chat-panel hidden" id="chatPanel">
           <div class="chat-messages" id="chatMessages">
-            <div class="chat-message chat-message--system">Чат начнётся когда собеседник подключится</div>
+            <div class="chat-message chat-message--system">
+              Чат станет доступен после подключения
+            </div>
           </div>
           <div class="chat-input-group">
-            <input type="text" id="chatInput" placeholder="Напишите сообщение..." disabled />
-            <button type="button" id="chatSendBtn" class="btn btn-primary btn-small" disabled>➤</button>
+            <input
+              type="text"
+              id="chatInput"
+              placeholder="Сообщение..."
+              disabled
+            />
+            <button
+              type="button"
+              id="chatSendBtn"
+              class="btn btn-primary btn-sm"
+              disabled
+            >
+              →
+            </button>
           </div>
         </div>
-
       </div>
 
-      <!-- Вкладки: чат / логи / статистика / настройки -->
-      <div class="tabs-panel">
-        <div class="tabs-header">
-          <button type="button" class="tab-btn tab-btn--active" data-tab="logs">📋 Логи</button>
-          <button type="button" class="tab-btn" data-tab="stats">📊 Сеть</button>
-          <button type="button" class="tab-btn" data-tab="settings">⚙️ Настройки</button>
+      <!-- ВКЛАДКИ -->
+
+      <!-- DRAWER — выдвижная панель логов / статистики / настроек -->
+      <!-- Затемнение фона при открытии -->
+      <div class="drawer-overlay" id="drawerOverlay"></div>
+
+      <!-- Сама панель -->
+      <div
+        class="drawer"
+        id="drawer"
+        role="dialog"
+        aria-label="Панель логов и настроек"
+      >
+        <!-- Декоративная ручка сверху -->
+        <div class="drawer-handle"></div>
+
+        <!-- Шапка с вкладками и кнопкой закрытия -->
+        <div class="drawer-header">
+          <div class="drawer-tabs">
+            <button
+              type="button"
+              class="drawer-tab-btn drawer-tab-btn--active"
+              data-tab="logs"
+            >
+              Логи
+            </button>
+            <button type="button" class="drawer-tab-btn" data-tab="stats">
+              Статистика
+            </button>
+            <button type="button" class="drawer-tab-btn" data-tab="settings">
+              Настройки
+            </button>
+          </div>
+          <button
+            type="button"
+            class="drawer-close-btn"
+            id="drawerCloseBtn"
+            title="Закрыть"
+          >
+            &times;
+          </button>
         </div>
 
-        <!-- Вкладка логов -->
-        <div class="tab-content" id="tab-logs">
-          <div id="statusLog" class="log-container" role="log" aria-live="polite" aria-label="Журнал событий">
-            <div class="log-item system">Ожидание действий...</div>
+        <!-- Тело drawer — три панели -->
+        <div class="drawer-body">
+          <!-- Панель логов — активна по умолчанию -->
+          <div class="drawer-tab-panel" data-panel="logs">
+            <div
+              id="statusLog"
+              class="log-container"
+              role="log"
+              aria-live="polite"
+            >
+              <div class="log-item system">Ожидание действий...</div>
+            </div>
+          </div>
+
+          <!-- Панель статистики -->
+          <div class="drawer-tab-panel hidden" data-panel="stats">
+            <div class="stats-grid">
+              <div class="stat-item">
+                <span class="stat-label">Входящее</span>
+                <span class="stat-value" id="statInbound">— Mbps</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Исходящее</span>
+                <span class="stat-value" id="statOutbound">— Mbps</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Задержка</span>
+                <span class="stat-value" id="statRtt">— ms</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Потери</span>
+                <span class="stat-value" id="statLoss">— %</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Панель настроек -->
+          <div class="drawer-tab-panel hidden" data-panel="settings">
+            <div class="settings-panel">
+              <label for="serverUrlInput">Сервер сигнализации</label>
+              <div class="settings-input-group">
+                <input
+                  type="text"
+                  id="serverUrlInput"
+                  placeholder="wss://meet.gohub.su/ws"
+                />
+                <button
+                  type="button"
+                  id="saveServerBtn"
+                  class="btn btn-secondary btn-sm"
+                >
+                  Сохранить
+                </button>
+                <button
+                  type="button"
+                  id="connectBtn"
+                  class="btn btn-primary btn-sm"
+                >
+                  Подключить
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-
-        <!-- Вкладка статистики -->
-        <div class="tab-content hidden" id="tab-stats">
-          <div class="stats-grid">
-            <div class="stat-item">
-              <span class="stat-label">Входящее</span>
-              <span class="stat-value" id="statInbound">— Mbps</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-label">Исходящее</span>
-              <span class="stat-value" id="statOutbound">— Mbps</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-label">Задержка</span>
-              <span class="stat-value" id="statRtt">— ms</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-label">Потери</span>
-              <span class="stat-value" id="statLoss">— %</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Вкладка настроек -->
-        <div class="tab-content hidden" id="tab-settings">
-          <div class="settings-panel">
-            <label for="serverUrlInput">🔗 Сервер сигнализации:</label>
-            <div class="settings-input-group">
-              <input type="text" id="serverUrlInput" placeholder="wss://meet.gohub.su/ws" />
-              <button type="button" id="saveServerBtn" class="btn btn-small" title="Сохранить адрес сервера">💾</button>
-              <button type="button" id="connectBtn" class="btn btn-small btn-primary" title="Подключиться к серверу">🔌 Подкл.</button>
-            </div>
-            <div class="server-status" id="serverStatus">
-              <span class="dot">⚪</span> <span class="text">Ожидание...</span>
-            </div>
-          </div>
-        </div>
-
       </div>
-
-      <!-- Скрытые источники -->
-      <video id="localVideo"  class="video-hidden" autoplay playsinline muted></video>
-      <video id="remoteVideo" class="video-hidden" autoplay playsinline></video>
     </main>
 
-    <!-- Превью -->
+    <!-- Скрытые видео элементы -->
+    <video
+      id="localVideo"
+      class="video-hidden"
+      autoplay
+      playsinline
+      muted
+    ></video>
+    <video id="remoteVideo" class="video-hidden" autoplay playsinline></video>
+
+    <!-- ПРЕВЬЮ -->
     <div id="previewModal" class="modal-overlay">
       <div class="modal-content modal-content--preview">
         <div class="modal-header">
@@ -142,33 +323,59 @@
         </div>
         <div class="modal-body">
           <div class="preview-video-wrapper">
-            <video id="previewVideo" class="preview-video" autoplay playsinline muted></video>
-            <div id="previewNoCamera" class="preview-no-camera hidden">📷 Камера выключена</div>
+            <video
+              id="previewVideo"
+              class="preview-video"
+              autoplay
+              playsinline
+              muted
+            ></video>
+            <div id="previewNoCamera" class="preview-no-camera hidden">
+              Камера выключена
+            </div>
           </div>
           <div class="preview-controls">
-            <button type="button" id="previewMicBtn" class="btn-control" title="Вкл/Выкл микрофон">🎤</button>
-            <button type="button" id="previewCamBtn" class="btn-control" title="Вкл/Выкл камеру">📷</button>
+            <button
+              type="button"
+              id="previewMicBtn"
+              class="btn-control"
+              title="Микрофон"
+            ></button>
+            <button
+              type="button"
+              id="previewCamBtn"
+              class="btn-control"
+              title="Камера"
+            ></button>
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" id="previewCancelBtn" class="btn btn-danger">Отмена</button>
-          <button type="button" id="previewStartBtn" class="btn btn-primary">Начать →</button>
+          <button type="button" id="previewCancelBtn" class="btn btn-secondary">
+            Отмена
+          </button>
+          <button type="button" id="previewStartBtn" class="btn btn-primary">
+            Начать →
+          </button>
         </div>
       </div>
     </div>
 
-    <!-- Модальное окно ошибок -->
+    <!-- ОШИБКИ -->
     <div id="errorModal" class="modal-overlay">
       <div class="modal-content">
         <div class="modal-header">
           <h2 id="modalTitle">Ошибка</h2>
-          <button type="button" id="modalCloseBtn" class="close-btn">&times;</button>
+          <button type="button" id="modalCloseBtn" class="close-btn">
+            &times;
+          </button>
         </div>
         <div class="modal-body">
-          <p id="modalMessage">Произошла ошибка соединения.</p>
+          <p id="modalMessage">Произошла ошибка.</p>
         </div>
         <div class="modal-footer">
-          <button type="button" id="modalOkBtn" class="btn btn-primary">Понятно</button>
+          <button type="button" id="modalOkBtn" class="btn btn-primary">
+            Понятно
+          </button>
         </div>
       </div>
     </div>

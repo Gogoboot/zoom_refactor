@@ -1,0 +1,140 @@
+/* ==========================================
+   DRAWER — выдвижная панель снизу
+   Открывается по кнопке шестерёнки в controls-bar
+   ========================================== */
+
+/* ─── Затемнение фона ───────────────────────────────── */
+.drawer-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+}
+
+.drawer-overlay--visible {
+    opacity: 1;
+    pointer-events: all;
+}
+
+/* ─── Сам drawer ────────────────────────────────────── */
+.drawer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 101;
+
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border);
+    border-radius: var(--radius) var(--radius) 0 0;
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.35);
+
+    /* Скрыт — уехал вниз */
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    display: flex;
+    flex-direction: column;
+    max-height: 55vh;
+}
+
+/* Открыт — выезжает вверх */
+.drawer--open {
+    transform: translateY(0);
+}
+
+/* ─── Шапка drawer ──────────────────────────────────── */
+.drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    height: 44px;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-tertiary);
+    border-radius: var(--radius) var(--radius) 0 0;
+}
+
+/* Ручка-полоска (декоративная) */
+.drawer-handle {
+    width: 36px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* Вкладки внутри шапки */
+.drawer-tabs {
+    display: flex;
+    gap: 4px;
+}
+
+.drawer-tab-btn {
+    padding: 6px 14px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    border-radius: var(--radius-sm);
+    transition: color 0.2s, background 0.2s;
+}
+
+.drawer-tab-btn:hover {
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+}
+
+.drawer-tab-btn--active {
+    color: var(--accent);
+    background: var(--bg-secondary);
+}
+
+/* Кнопка закрытия */
+.drawer-close-btn {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    border-radius: var(--radius-sm);
+    font-size: 1.1rem;
+    transition: color 0.2s, background 0.2s;
+    flex-shrink: 0;
+}
+
+.drawer-close-btn:hover {
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+}
+
+/* ─── Тело drawer ───────────────────────────────────── */
+.drawer-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+/* ─── Панели вкладок ────────────────────────────────── */
+.drawer-tab-panel {
+    padding: 14px 16px;
+}
+
+.drawer-tab-panel.hidden {
+    display: none;
+}
+
+/* ─── Переиспользуем классы логов из tabs.css ─────── */
+/* log-container, log-item, stats-grid и т.д. уже есть  */
+
+/* ─── Кнопка шестерёнки в controls-bar ─────────────── */
+#drawerBtn {
+    /* Стилизуется как обычная .btn-control через HTML */
+}

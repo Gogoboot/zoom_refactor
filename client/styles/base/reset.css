@@ -1,0 +1,43 @@
+/* ==========================================
+   СБРОС СТИЛЕЙ — убираем браузерные дефолты
+   ========================================== */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* Базовые настройки body */
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+    transition: background 0.3s, color 0.3s;
+}
+
+/* Кнопки — убираем браузерные стили */
+button {
+    cursor: pointer;
+    border: none;
+    background: none;
+    font-family: inherit;
+}
+
+/* Инпуты — убираем outline */
+input {
+    font-family: inherit;
+    outline: none;
+}
+
+/* Видео — убираем inline отступ */
+video {
+    display: block;
+}
+
+/* Ссылки — убираем подчёркивание */
+a {
+    color: inherit;
+    text-decoration: none;
+}

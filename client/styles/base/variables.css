@@ -1,0 +1,54 @@
+/* ==========================================
+   ТЕМЫ — переключаются через data-theme
+   ========================================== */
+
+[data-theme="dark"] {
+    --bg-primary:    #121212;
+    --bg-secondary:  #1e1e1e;
+    --bg-tertiary:   #2a2a2a;
+    --text-primary:  #ffffff;
+    --text-muted:    #a0a0a0;
+    --accent:        #E8834A;
+    --accent-hover:  #d4723b;
+    --danger:        #ff4d4d;
+    --warning:       #FFC107;
+    --border:        rgba(255,255,255,0.08);
+    --shadow:        0 4px 16px rgba(0,0,0,0.4);
+    --radius:        12px;
+    --radius-sm:     8px;
+    --radius-lg:     20px;
+}
+
+[data-theme="glass"] {
+    --bg-primary:    #0f1b2d;
+    --bg-secondary:  rgba(255,255,255,0.06);
+    --bg-tertiary:   rgba(255,255,255,0.10);
+    --text-primary:  #ffffff;
+    --text-muted:    #8ab4d4;
+    --accent:        #00b4d8;
+    --accent-hover:  #0096c7;
+    --danger:        #ff4d6d;
+    --warning:       #ffd60a;
+    --border:        rgba(255,255,255,0.12);
+    --shadow:        0 4px 24px rgba(0,0,0,0.5);
+    --radius:        12px;
+    --radius-sm:     8px;
+    --radius-lg:     20px;
+}
+
+[data-theme="light"] {
+    --bg-primary:    #f5f5f5;
+    --bg-secondary:  #ffffff;
+    --bg-tertiary:   #ebebeb;
+    --text-primary:  #111111;
+    --text-muted:    #666666;
+    --accent:        #7F77DD;
+    --accent-hover:  #6b63c9;
+    --danger:        #E24B4A;
+    --warning:       #BA7517;
+    --border:        rgba(0,0,0,0.10);
+    --shadow:        0 4px 16px rgba(0,0,0,0.08);
+    --radius:        12px;
+    --radius-sm:     8px;
+    --radius-lg:     20px;
+}

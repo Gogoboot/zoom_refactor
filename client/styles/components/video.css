@@ -1,0 +1,136 @@
+/* ==========================================
+   ВИДЕО КОНТЕЙНЕР — заполняет родителя
+   ========================================== */
+.video-container {
+  position: relative;
+  width: 100%;
+  height: 100%; /* заполняем video-section */
+  background: #000;
+  overflow: hidden;
+}
+
+.main-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* PiP */
+.pip-overlay {
+  position: absolute;
+  bottom: 80px;
+  right: 16px;
+  width: 180px;
+  height: 100px;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s;
+  background: #111;
+}
+
+.pip-overlay:hover {
+  transform: scale(1.05);
+}
+.pip-overlay.hidden {
+  display: none;
+}
+
+.pip-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Controls bar */
+.controls-bar {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+  padding: 8px 16px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* Громкость */
+.volume-slider-wrapper {
+  position: absolute;
+  left: 16px;
+  bottom: 80px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+  border-radius: var(--radius-lg);
+  padding: 12px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.volume-slider {
+  writing-mode: vertical-lr;
+  direction: rtl;
+  width: 6px;
+  height: 80px;
+  cursor: pointer;
+  accent-color: var(--accent);
+}
+
+.video-hidden {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .pip-overlay {
+    width: 120px;
+    height: 68px;
+  }
+  .volume-slider-wrapper {
+    display: none;
+  }
+}
+
+/* ==========================================
+   МОБИЛЬНОЕ ВИДЕО — адаптация под телефон
+   ========================================== */
+@media (max-width: 768px) {
+  /* Controls-bar поверх видео — абсолютное позиционирование уже есть,
+       просто поднимаем z-index и убираем белый фон снизу */
+  .controls-bar {
+    bottom: 12px;
+    background: rgba(0, 0, 0, 0.5); /* полупрозрачный тёмный фон */
+    border-color: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(12px);
+  }
+
+  /* Скрываем полный экран — на мобильном не нужен */
+  #fullscreenBtn {
+    display: none;
+  }
+
+  /* Скрываем swap — на мобильном мало места */
+  #swapBtn {
+    display: none;
+  }
+
+  /* PiP — вертикальный формат под телефон */
+  .pip-overlay {
+    width: 80px;
+    height: 110px;
+    bottom: 90px; /* выше controls-bar */
+    right: 10px;
+  }
+
+  /* Громкость — скрываем на мобильном */
+  .volume-slider-wrapper {
+    display: none;
+  }
+}

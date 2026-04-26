@@ -1,0 +1,48 @@
+/* ==========================================
+   ПРЕВЬЮ — модалка перед входом в комнату
+   ========================================== */
+
+/* Обёртка видео с соотношением сторон */
+.preview-video-wrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: #000;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    margin-bottom: 16px;
+}
+
+/* Зеркальное отображение — как в зеркале */
+.preview-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1);
+}
+
+/* Заглушка когда камера выключена */
+.preview-no-camera {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 1rem;
+    background: var(--bg-tertiary);
+}
+
+.preview-no-camera.hidden {
+    display: none;
+}
+
+/* ==========================================
+   КНОПКИ МИК/КАМ В ПРЕВЬЮ
+   ========================================== */
+.preview-controls {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 12px;
+}
