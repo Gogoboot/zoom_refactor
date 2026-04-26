@@ -96,7 +96,7 @@
   /* Controls-bar поверх видео — абсолютное позиционирование уже есть,
        просто поднимаем z-index и убираем белый фон снизу */
   .controls-bar {
-    bottom: calc(12px + env(safe-area-inset-bottom));
+    bottom: 12px;
     background: rgba(0, 0, 0, 0.5); /* полупрозрачный тёмный фон */
     border-color: rgba(255, 255, 255, 0.15);
     backdrop-filter: blur(12px);
