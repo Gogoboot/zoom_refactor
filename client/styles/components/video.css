@@ -88,15 +88,6 @@
   display: none;
 }
 
-@media (max-width: 768px) {
-  .pip-overlay {
-    width: 120px;
-    height: 68px;
-  }
-  .volume-slider-wrapper {
-    display: none;
-  }
-}
 
 /* ==========================================
    МОБИЛЬНОЕ ВИДЕО — адаптация под телефон
@@ -105,7 +96,7 @@
   /* Controls-bar поверх видео — абсолютное позиционирование уже есть,
        просто поднимаем z-index и убираем белый фон снизу */
   .controls-bar {
-    bottom: 12px;
+    bottom: calc(12px + env(safe-area-inset-bottom));
     background: rgba(0, 0, 0, 0.5); /* полупрозрачный тёмный фон */
     border-color: rgba(255, 255, 255, 0.15);
     backdrop-filter: blur(12px);
