@@ -101,9 +101,7 @@
   left: 50%;
   transform: translateX(-50%);
 
-  /* background: var(--bg-glass); */
-
-  background: red !important;
+  background: var(--bg-glass);
 
   border: 1px solid rgba(255,255,255,0.15);
   backdrop-filter: blur(12px);
