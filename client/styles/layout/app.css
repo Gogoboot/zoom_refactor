@@ -46,13 +46,7 @@ body {
     .app {
         padding: 0;
         gap: 0;
-      }
-
-    /* dvh — динамическая высота viewport, учитывает панель навигации */
-    body {
-        height: 100dvh;
     }
-
 
     /* Убираем отступы у панели комнаты */
     .room-controls {
@@ -68,4 +62,3 @@ body {
         border: none;
     }
 }
-

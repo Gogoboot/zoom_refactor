@@ -14,8 +14,6 @@
   height: 100%;
   object-fit: cover;
   display: block;
-
-  background: url('https://picsum.photos/800/600') center/cover;
 }
 
 /* PiP */
@@ -90,30 +88,33 @@
   display: none;
 }
 
+@media (max-width: 768px) {
+  .pip-overlay {
+    width: 120px;
+    height: 68px;
+  }
+  .volume-slider-wrapper {
+    display: none;
+  }
+}
 
 /* ==========================================
    МОБИЛЬНОЕ ВИДЕО — адаптация под телефон
    ========================================== */
 @media (max-width: 768px) {
+  
+  .video-container {
+    padding-bottom: 80px;
+  }
+  
   /* Controls-bar поверх видео — абсолютное позиционирование уже есть,
        просто поднимаем z-index и убираем белый фон снизу */
-.controls-bar {
-  position: absolute;
-  bottom: 12px;
-  left: 50%;
-  transform: translateX(-50%);
-
-  background: var(--bg-glass);
-
-  border: 1px solid rgba(255,255,255,0.15);
-  backdrop-filter: blur(12px);
-
-  padding: 8px 16px;
-  border-radius: var(--radius-lg);
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
+  .controls-bar {
+    bottom: 12px;
+    background: rgba(0, 0, 0, 0.5); /* полупрозрачный тёмный фон */
+    border-color: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(12px);
+  }
 
   /* Скрываем полный экран — на мобильном не нужен */
   #fullscreenBtn {
