@@ -11,27 +11,37 @@ export function createPreviewComponent({
   previewStartBtn,
   previewCancelBtn,
   previewNoCamera,
+
+  modeVideoBtn,
+  modeAudioBtn,
+  modeDataBtn,
 }) {
   let micEnabled = true;
   let camEnabled = true;
   let onStartCallback = null;
+  let mode = 'video';
 
   async function show(action) {
     micEnabled = true;
     camEnabled = true;
 
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: true,
-      });
-      previewVideo.srcObject = stream;
-      previewMicBtn.classList.remove("muted");
-      previewCamBtn.classList.remove("muted");
-      previewNoCamera.classList.add("hidden");
-    } catch (err) {
-      throw new Error(`Нет доступа к камере: ${err.message}`);
-    }
+let stream = null;
+
+try {
+  stream = await navigator.mediaDevices.getUserMedia({
+    video: true,
+    audio: true,
+  });
+
+  previewVideo.srcObject = stream;
+  previewNoCamera.classList.add("hidden");
+
+} catch (err) {
+  console.warn("Нет доступа к медиа:", err);
+
+  previewVideo.srcObject = null;
+  previewNoCamera.classList.remove("hidden");
+}
 
     previewModal.style.display = "flex";
     return action;
@@ -56,6 +66,7 @@ export function createPreviewComponent({
     return camEnabled;
   }
 
+  
   // Обработчики кнопок превью
   /* Микрофон — переключение с иконкой */
   previewMicBtn.addEventListener("click", () => {

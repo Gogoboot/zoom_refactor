@@ -12,6 +12,6 @@
     "vite": "^8.0.4"
   },
   "dependencies": {
-    "lucide": "^1.11.0"
+    "lucide-static": "^1.14.0"
   }
 }

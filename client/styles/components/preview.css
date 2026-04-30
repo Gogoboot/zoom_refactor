@@ -1,6 +1,7 @@
 /* ==========================================
    ПРЕВЬЮ — модалка перед входом в комнату
    ========================================== */
+   
 
 /* Обёртка видео с соотношением сторон */
 .preview-video-wrapper {
@@ -43,6 +44,24 @@
 .preview-controls {
     display: flex;
     justify-content: center;
-    gap: 16px;
-    margin-bottom: 12px;
+    gap: 10px;
+    margin-bottom: 10px;
 }
+
+/* .preview-modes {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+} */
+
+/* .preview-modes .btn-control.active {
+  background: var(--primary-color);
+} */
+
+/* .preview-modes-label {
+  text-align: center;
+  font-size: 12px;
+  opacity: 0.6;
+  margin-top: 8px;
+  margin-bottom: 4px;
+} */

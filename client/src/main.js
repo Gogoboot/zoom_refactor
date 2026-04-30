@@ -25,18 +25,30 @@ import { createPreviewComponent } from "./presentation/components/preview.js";
 // Импортируем компонент drawer — выдвижная панель логов и настроек
 import { createDrawerComponent } from "./presentation/components/drawer.js";
 /* Роутер — управление URL */
-import { getRoomIdFromUrl, setRoomUrl, clearRoomUrl, getRoomLink } from './infrastructure/router.js';
+import {
+  getRoomIdFromUrl,
+  setRoomUrl,
+  clearRoomUrl,
+  getRoomLink,
+} from "./infrastructure/router.js";
 
 /* Иконки */
 import {
-    iconMic, iconMicOff,
-    iconVideo, iconVideoOff,
-    iconPhoneOff, iconSwap,
-    iconChat, iconMaximize,
-    iconCopy, iconPlus,
-    iconJoin, iconLeave,
-    iconSend, iconSettings,
-} from './infrastructure/icons.js';
+  iconMic,
+  iconMicOff,
+  iconVideo,
+  iconVideoOff,
+  iconPhoneOff,
+  iconSwap,
+  iconChat,
+  iconMaximize,
+  iconCopy,
+  iconPlus,
+  iconJoin,
+  iconLeave,
+  iconSend,
+  iconSettings,
+} from "./infrastructure/icons.js";
 
 // ==========================================
 // 1. ПРОВЕРКА ПОДДЕРЖКИ WEBRTC
@@ -69,10 +81,10 @@ const els = {
   swapBtn: $("swapBtn"),
   chatToggleBtn: $("chatToggleBtn"),
   fullscreenBtn: $("fullscreenBtn"),
-  drawerBtn:      $("drawerBtn"),       // кнопка шестерёнки в controls-bar
-  drawer:         $("drawer"),          // сама панель drawer
-  drawerOverlay:  $("drawerOverlay"),   // затемнение фона
-  drawerCloseBtn: $("drawerCloseBtn"),  // кнопка закрытия внутри drawer
+  drawerBtn: $("drawerBtn"), // кнопка шестерёнки в controls-bar
+  drawer: $("drawer"), // сама панель drawer
+  drawerOverlay: $("drawerOverlay"), // затемнение фона
+  drawerCloseBtn: $("drawerCloseBtn"), // кнопка закрытия внутри drawer
   volumeSlider: $("volumeSlider"),
 
   // Чат
@@ -80,6 +92,8 @@ const els = {
   chatMessages: $("chatMessages"),
   chatInput: $("chatInput"),
   chatSendBtn: $("chatSendBtn"),
+  fileBtn: $("fileBtn"),
+  fileInput: $("fileInput"),
 
   // Статистика
   statInbound: $("statInbound"),
@@ -147,7 +161,7 @@ const controls = createControlsComponent({
   swapBtn: els.swapBtn,
   fullscreenBtn: els.fullscreenBtn,
   chatToggleBtn: els.chatToggleBtn,
-  drawerBtn:     els.drawerBtn, 
+  drawerBtn: els.drawerBtn,
   volumeSlider: els.volumeSlider,
   mainVideo: els.mainVideo,
 });
@@ -167,15 +181,17 @@ const preview = createPreviewComponent({
   previewStartBtn: els.previewStartBtn,
   previewCancelBtn: els.previewCancelBtn,
   previewNoCamera: els.previewNoCamera,
+  modeVideoBtn: null,
+  modeAudioBtn: null,
+  modeDataBtn: null,
 });
 
 // Создаём компонент drawer — передаём ему его DOM элементы
 const drawer = createDrawerComponent({
-    drawerEl:        els.drawer,
-    drawerOverlayEl: els.drawerOverlay,
-    drawerCloseBtn:  els.drawerCloseBtn,
-    controlsBar:     document.querySelector('.controls-bar'), // передаём панель кнопок
-
+  drawerEl: els.drawer,
+  drawerOverlayEl: els.drawerOverlay,
+  drawerCloseBtn: els.drawerCloseBtn,
+  controlsBar: document.querySelector(".controls-bar"), // передаём панель кнопок
 });
 
 // ==========================================
@@ -267,6 +283,15 @@ async function initWebRTC() {
             sender: "Собеседник",
           }),
         );
+      } else if (msg.type === "file") {
+        chat.addMessage(
+          createMessage({
+            text: msg.name,
+            isOwn: false,
+            sender: "Собеседник",
+            fileUrl: msg.url,
+          }),
+        );
       }
     },
     onConnectionState: (connectionState) => {
@@ -290,17 +315,17 @@ const ws = createWebSocketAdapter({
     addStatus(`📥 Получено: ${msg.type}`);
 
     switch (msg.type) {
-case 'room_created': {
-    const room = roomFromServer(msg);
-    state.set({ room, isInRoom: true });
-    els.roomIdInput.value = room.id;
-    enableRoomButtons(true);
-    /* Меняем URL — теперь можно скинуть ссылку другу */
-    setRoomUrl(room.id);
-    addStatus(`✅ Комната создана: ${room.id}`);
-    addStatus(`🔗 Ссылка: ${getRoomLink(room.id)}`);
-    break;
-}
+      case "room_created": {
+        const room = roomFromServer(msg);
+        state.set({ room, isInRoom: true });
+        els.roomIdInput.value = room.id;
+        enableRoomButtons(true);
+        /* Меняем URL — теперь можно скинуть ссылку другу */
+        setRoomUrl(room.id);
+        addStatus(`✅ Комната создана: ${room.id}`);
+        addStatus(`🔗 Ссылка: ${getRoomLink(room.id)}`);
+        break;
+      }
       case "room_joined": {
         const room = roomFromServer(msg);
         state.set({ room, isInRoom: true });
@@ -427,10 +452,13 @@ function handleReset() {
 // 8. ОБРАБОТЧИКИ КНОПОК КОМНАТЫ
 // ==========================================
 preview.onStart(async ({ stream, micEnabled, camEnabled }) => {
-  const audioTrack = stream.getAudioTracks()[0];
-  const videoTrack = stream.getVideoTracks()[0];
-  if (audioTrack) audioTrack.enabled = micEnabled;
-  if (videoTrack) videoTrack.enabled = camEnabled;
+  if (stream) {
+    const audioTrack = stream.getAudioTracks()[0];
+    const videoTrack = stream.getVideoTracks()[0];
+
+    if (audioTrack) audioTrack.enabled = micEnabled;
+    if (videoTrack) videoTrack.enabled = camEnabled;
+  }
 
   els.localVideo.srcObject = stream;
   state.set({ localStream: stream });
@@ -442,8 +470,9 @@ preview.onStart(async ({ stream, micEnabled, camEnabled }) => {
   videoLayout.update(state.get());
 
   await initWebRTC();
-  webrtc.addTracks(stream);
-
+  if (stream) {
+    webrtc.addTracks(stream);
+  }
   const { pendingAction, room } = state.get();
   if (pendingAction === "create") {
     createRoom({ sendSignaling: ws.send });
@@ -530,9 +559,9 @@ controls.onSwapClick(() => {
 });
 
 controls.onChatToggleClick(() => {
-    chat.toggle();
+  chat.toggle();
 
-    els.appContainer.classList.toggle('chat-open');
+  els.appContainer.classList.toggle("chat-open");
 });
 
 // По клику на шестерёнку — открываем/закрываем drawer
@@ -566,6 +595,32 @@ els.chatInput.addEventListener("keydown", (e) => {
   }
 });
 
+els.fileBtn.addEventListener("click", () => {
+  els.fileInput.click();
+});
+
+els.fileInput.addEventListener("change", async () => {
+  const file = els.fileInput.files[0];
+  if (!file) return;
+
+  try {
+    await webrtc.sendFile(file);
+
+    chat.addMessage({
+      text: file.name,
+      isOwn: true,
+      sender: "Вы",
+      fileUrl: URL.createObjectURL(file)
+    });
+
+
+    addStatus(`📎 Файл отправлен: ${file.name}`);
+  } catch (err) {
+    addStatus(`❌ Ошибка отправки файла`, true);
+  }
+
+  els.fileInput.value = "";
+});
 // ==========================================
 // 11. КОПИРОВАНИЕ ID КОМНАТЫ
 // ==========================================
@@ -652,28 +707,28 @@ els.connectBtn.addEventListener("click", () => {
    ИКОНКИ — расставляем SVG по кнопкам
    ========================================== */
 function initIcons() {
-    // Controls bar
-    els.micBtn.appendChild(iconMic());
-    els.camBtn.appendChild(iconVideo());
-    els.hangupBtn.appendChild(iconPhoneOff());
-    els.swapBtn.appendChild(iconSwap());
-    els.chatToggleBtn.appendChild(iconChat());
-    els.fullscreenBtn.appendChild(iconMaximize());
-    els.drawerBtn.appendChild(iconSettings());  // шестерёнка на кнопке drawer
+  // Controls bar
+  els.micBtn.appendChild(iconMic());
+  els.camBtn.appendChild(iconVideo());
+  els.hangupBtn.appendChild(iconPhoneOff());
+  els.swapBtn.appendChild(iconSwap());
+  els.chatToggleBtn.appendChild(iconChat());
+  els.fullscreenBtn.appendChild(iconMaximize());
+  els.drawerBtn.appendChild(iconSettings()); // шестерёнка на кнопке drawer
 
-    // Панель комнаты
-    els.createBtn.prepend(iconPlus());
-    els.joinBtn.prepend(iconJoin());
-    els.leaveBtn.prepend(iconLeave());
-    els.copyRoomBtn.prepend(iconCopy());
+  // Панель комнаты
+  els.createBtn.prepend(iconPlus());
+  els.joinBtn.prepend(iconJoin());
+  els.leaveBtn.prepend(iconLeave());
+  els.copyRoomBtn.prepend(iconCopy());
 
-    // Чат
-    els.chatSendBtn.innerHTML = '';
-    els.chatSendBtn.appendChild(iconSend());
+  // Чат
+  els.chatSendBtn.innerHTML = "";
+  els.chatSendBtn.appendChild(iconSend());
 
-    /* Превью */
-    els.previewMicBtn.appendChild(iconMic());
-    els.previewCamBtn.appendChild(iconVideo());
+  /* Превью */
+  els.previewMicBtn.appendChild(iconMic());
+  els.previewCamBtn.appendChild(iconVideo());
 }
 // ==========================================
 // 16. ЗАПУСК
@@ -689,6 +744,11 @@ ws.connect(els.serverUrlInput.value.trim());
 /* Проверяем URL — если есть roomId, автоматически входим в комнату */
 const roomIdFromUrl = getRoomIdFromUrl();
 if (roomIdFromUrl) {
-    els.roomIdInput.value = roomIdFromUrl;
-    addStatus(`🔗 Вход по ссылке в комнату: ${roomIdFromUrl}`);
+  els.roomIdInput.value = roomIdFromUrl;
+  addStatus(`🔗 Вход по ссылке в комнату: ${roomIdFromUrl}`);
 }
+
+window.sendTestFile = async (file) => {
+  if (!webrtc) return console.log("нет webrtc");
+  await webrtc.sendFile(file);
+};

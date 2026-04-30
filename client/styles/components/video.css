@@ -7,6 +7,10 @@
   height: 100%; /* заполняем video-section */
   background: #000;
   overflow: hidden;
+
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
 }
 
 .main-video {
@@ -48,16 +52,25 @@
 .controls-bar {
   position: absolute;
   bottom: 12px;
-  left: 50%;
-  transform: translateX(-50%);
+
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+
+  width: fit-content;
+  max-width: calc(100% - 32px);
+
+  display: flex;
+  gap: 10px;
+  align-items: center;
+
   background: var(--bg-secondary);
   border: 1px solid var(--border);
   backdrop-filter: blur(12px);
   padding: 8px 16px;
   border-radius: var(--radius-lg);
-  display: flex;
-  gap: 10px;
-  align-items: center;
+
+  z-index: 10;
 }
 
 /* Громкость */
@@ -102,18 +115,24 @@
    МОБИЛЬНОЕ ВИДЕО — адаптация под телефон
    ========================================== */
 @media (max-width: 768px) {
-  
   .video-container {
+    height: 100vh;
+    height: 100dvh;
     padding-bottom: 80px;
   }
-  
+
   /* Controls-bar поверх видео — абсолютное позиционирование уже есть,
        просто поднимаем z-index и убираем белый фон снизу */
   .controls-bar {
-    bottom: 12px;
     background: rgba(0, 0, 0, 0.5); /* полупрозрачный тёмный фон */
     border-color: rgba(255, 255, 255, 0.15);
     backdrop-filter: blur(12px);
+        /* ✅ Изменяем эти строки: */
+    bottom: 10px;             /* Чуть поднимаем от края */
+    margin-bottom: 0;         /* Убираем авто-марджин */
+    
+    /* ✅ Добавляем безопасную зону для iPhone/Android */
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
   }
 
   /* Скрываем полный экран — на мобильном не нужен */

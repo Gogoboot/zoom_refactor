@@ -66,7 +66,6 @@
             title="Скопировать ссылку"
             disabled
           >
-            Копировать
           </button>
           <button type="button" id="joinBtn" class="btn btn-secondary">
             Войти
@@ -177,6 +176,17 @@
             </div>
           </div>
           <div class="chat-input-group">
+            <input type="file" id="fileInput" hidden />
+
+            <button
+              type="button"
+              id="fileBtn"
+              class="btn btn-secondary btn-sm"
+              title="Отправить файл"
+            >
+              📎
+            </button>
+            
             <input
               type="text"
               id="chatInput"
@@ -348,6 +358,27 @@
               title="Камера"
             ></button>
           </div>
+          <!-- <div class="preview-modes-label">Режим звонка</div>
+          <div class="preview-modes">
+            <button
+              type="button"
+              id="modeVideoBtn"
+              class="btn-control active"
+              title="Видео"
+            ></button>
+            <button
+              type="button"
+              id="modeAudioBtn"
+              class="btn-control"
+              title="Аудио"
+            ></button>
+            <button
+              type="button"
+              id="modeDataBtn"
+              class="btn-control"
+              title="Чат"
+            ></button>
+          </div> -->
         </div>
         <div class="modal-footer">
           <button type="button" id="previewCancelBtn" class="btn btn-secondary">
