@@ -178,8 +178,7 @@ export function createWebRTCAdapter({
         pc.addTrack(t, stream);
       }
     });
-  }
-  я;
+  };
 
   async function createOffer() {
     const offer = await pc.createOffer();
