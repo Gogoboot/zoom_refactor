@@ -33,6 +33,17 @@ export function createWebSocketAdapter({ onMessage, onStatusChange }) {
     }
 
     function connect(url = DEFAULT_WS) {
+
+    // Сначала получаем токен
+    let token = null;
+    try {
+        const res = await fetch('https://gohub.su/auth/guest');
+        const data = await res.json();
+        token = data.token;
+    } catch (e) {
+        console.warn('Не удалось получить токен:', e);
+    }
+
         if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
         if (wsConnectTimer) { clearTimeout(wsConnectTimer); wsConnectTimer = null; }
         if (ws) { ws.close(); ws = null; }
@@ -44,6 +55,7 @@ export function createWebSocketAdapter({ onMessage, onStatusChange }) {
         if (!url.endsWith('/ws')) url = url.replace(/\/+$/, '') + '/ws';
 
         onStatusChange('connecting');
+        const wsUrl = token ? `${url}?token=${token}` : url;
         ws = new WebSocket(url);
 
         // Тайм-аут подключения
