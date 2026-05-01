@@ -37,7 +37,7 @@ export function createWebSocketAdapter({ onMessage, onStatusChange }) {
     // Сначала получаем токен
     let token = null;
     try {
-        const res = await fetch('https://gohub.su/auth/guest');
+        const res = await fetch('https://meet.gohub.su/auth/guest');
         const data = await res.json();
         token = data.token;
     } catch (e) {
