@@ -32,7 +32,7 @@ export function createWebSocketAdapter({ onMessage, onStatusChange }) {
         }
     }
 
-    function connect(url = DEFAULT_WS) {
+    async function connect(url = DEFAULT_WS) {
 
     // Сначала получаем токен
     let token = null;
