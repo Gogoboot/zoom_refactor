@@ -27,8 +27,8 @@ pub async fn auth_middleware(
     mut request: Request<Body>,
     next: Next,
 ) -> Result<Response, StatusCode> {
-    let token = extract_bearer_token(request.headers())
-        .ok_or(StatusCode::UNAUTHORIZED)?;
+    let token = extract_bearer_token(request.headers(), request.uri())
+    .ok_or(StatusCode::UNAUTHORIZED)?;
 
     let claims = verify_token(&token, &state.jwt_secret)
         .map_err(|_| StatusCode::UNAUTHORIZED)?;
@@ -40,10 +40,23 @@ pub async fn auth_middleware(
 }
 
 /// Извлекает токен из заголовка `Authorization: Bearer <token>`
-fn extract_bearer_token(headers: &axum::http::HeaderMap) -> Option<String> {
+fn extract_bearer_token(
+    headers: &axum::http::HeaderMap,
+    uri: &axum::http::Uri,
+) -> Option<String> {
+    // Сначала пробуем query параметр (для WebSocket)
+    if let Some(query) = uri.query() {
+        for pair in query.split('&') {
+            if let Some(token) = pair.strip_prefix("token=") {
+                return Some(token.to_string());
+            }
+        }
+    }
+    // Потом пробуем заголовок (для обычных HTTP запросов)
     headers
         .get("Authorization")
         .and_then(|v| v.to_str().ok())
         .and_then(|v| v.strip_prefix("Bearer "))
         .map(|s| s.to_string())
 }
+
