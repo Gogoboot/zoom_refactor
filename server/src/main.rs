@@ -12,6 +12,20 @@ use signaling_server::{Config, ConnectionRegistry, MemoryRoomStore, Orchestrator
 use axum::http::Method;
 use tower_http::cors::{Any, CorsLayer};
 
+use axum::middleware;
+use axum::Extension;
+use signaling_server::{issue_guest_token, Claims, auth_middleware, AuthState};
+
+
+/// Новый DTO для /auth/guest:
+#[derive(Serialize)]
+struct GuestTokenResponse {
+    token: String,
+    user_id: String,
+    expires_in: u64,
+}
+
+
 /// DTO для ответа /admin/rooms
 #[derive(Serialize)]
 struct RoomInfo {
@@ -34,6 +48,7 @@ struct AppState {
     admin_token: String,
     turn_secret: String,
     domain: String,
+    jwt_secret: String,
 }
 
 #[tokio::main]
@@ -60,6 +75,7 @@ async fn main() -> Result<(), signaling_server::AppError> {
         admin_token: config.admin_token.clone(),
         turn_secret: config.turn_secret.clone(),
         domain: config.domain.clone(),
+        jwt_secret: config.jwt_secret.clone(), 
     };
 
     // 5. Сборка приложения
@@ -68,15 +84,33 @@ async fn main() -> Result<(), signaling_server::AppError> {
         .allow_methods([Method::GET])
         .allow_headers(Any);
 
-    let app = Router::new()
-        .route("/ws", get(websocket_handler))
-        .route("/health", get(|| async { "ok" }))
-        .route("/health/live", get(health_live_handler))
-        .route("/health/ready", get(health_ready_handler))
-        .route("/admin/rooms", get(admin_rooms_handler))
-        .route("/api/ice-servers", get(ice_servers_handler))
-        .layer(cors)
-        .with_state(state);
+// СТАЛО:
+let auth_state = AuthState {
+    jwt_secret: config.jwt_secret.clone(),
+};
+
+// Защищённые роуты — требуют JWT токен
+let protected = Router::new()
+    .route("/ws", get(websocket_handler))
+    .route("/api/ice-servers", get(ice_servers_handler))
+    .route_layer(middleware::from_fn_with_state(
+        auth_state,
+        auth_middleware,
+    ));
+
+// Публичные роуты — без токена
+let public = Router::new()
+    .route("/auth/guest", get(guest_token_handler))
+    .route("/health", get(|| async { "ok" }))
+    .route("/health/live", get(health_live_handler))
+    .route("/health/ready", get(health_ready_handler))
+    .route("/admin/rooms", get(admin_rooms_handler));
+
+let app = Router::new()
+    .merge(protected)
+    .merge(public)
+    .layer(cors)
+    .with_state(state);
 
     let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", config.port)).await?;
     tracing::info!("🚀 Server listening on {}", listener.local_addr()?);
@@ -111,9 +145,10 @@ async fn main() -> Result<(), signaling_server::AppError> {
 async fn websocket_handler(
     ws: axum::extract::WebSocketUpgrade,
     State(state): State<AppState>,
+    Extension(claims): Extension<Claims>,  // ← берём из middleware
 ) -> Response {
     ws.on_upgrade(|socket| async move {
-        state.orchestrator.handle_connection(socket).await;
+        state.orchestrator.handle_connection(socket, claims.user_id).await;
     })
 }
 
@@ -172,7 +207,10 @@ async fn health_ready_handler(State(state): State<AppState>) -> Result<&'static 
 }
 
 /// ICE servers handler — возвращает STUN/TURN credentials
-async fn ice_servers_handler(State(state): State<AppState>) -> Json<serde_json::Value> {
+async fn ice_servers_handler(
+    State(state): State<AppState>,
+    Extension(claims): Extension<Claims>,  // ← добавить
+) -> Json<serde_json::Value> {
     use base64::{engine::general_purpose::STANDARD, Engine};
     use hmac::{Hmac, Mac};
     use sha1::Sha1;
@@ -184,7 +222,7 @@ async fn ice_servers_handler(State(state): State<AppState>) -> Json<serde_json::
         .as_secs()
         + ttl;
 
-    let username = format!("{}:user", timestamp);
+    let username = format!("{}:{}", timestamp, claims.user_id);
 
     let mut mac = Hmac::<Sha1>::new_from_slice(state.turn_secret.as_bytes()).unwrap();
     mac.update(username.as_bytes());
@@ -205,5 +243,23 @@ async fn ice_servers_handler(State(state): State<AppState>) -> Json<serde_json::
                 "credential": password
             }
         ]
+    }))
+}
+
+/// Guest token handler — выдаёт анонимный JWT токен
+async fn guest_token_handler(
+    State(state): State<AppState>,
+) -> Result<Json<GuestTokenResponse>, StatusCode> {
+    let ttl = 3600u64;
+
+    let (token, claims) = issue_guest_token(&state.jwt_secret, ttl)
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+    tracing::info!(user_id = %claims.user_id, "🎫 Выдан гостевой токен");
+
+    Ok(Json(GuestTokenResponse {
+         token,
+         user_id: claims.user_id,
+         expires_in: ttl,
     }))
 }

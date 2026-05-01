@@ -156,10 +156,30 @@ export function createWebRTCAdapter({
     };
   }
 
+  // СТАЛО:
   function addTracks(stream) {
     if (!stream || !pc) return;
-    stream.getTracks().forEach((t) => pc.addTrack(t, stream));
+
+    stream.getTracks().forEach((t) => {
+      // Ищем существующий transceiver для этого типа (video/audio)
+      const existing = pc
+        .getTransceivers()
+        .find(
+          (tc) =>
+            tc.receiver.track.kind === t.kind && tc.direction === "recvonly",
+        );
+
+      if (existing) {
+        // Переиспользуем существующий — меняем direction и добавляем sender
+        existing.sender.replaceTrack(t);
+        existing.direction = "sendrecv";
+      } else {
+        // Нового типа трек (например audio) — добавляем обычно
+        pc.addTrack(t, stream);
+      }
+    });
   }
+  я;
 
   async function createOffer() {
     const offer = await pc.createOffer();
@@ -203,8 +223,6 @@ export function createWebRTCAdapter({
       dataChannel.send(data);
     }
   }
-
-  
 
   async function sendFile(file) {
     console.log("SEND FILE START", file.name);

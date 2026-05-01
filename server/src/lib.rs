@@ -124,6 +124,10 @@ pub use domain::ParticipantInfo;
 /// Определяет интерфейс для хранения и получения данных о комнатах.
 /// Позволяет заменять реализацию хранилища (например, на Redis) без изменения бизнес-логики.
 pub use infrastructure::RoomRepository;
+// Auth — идентификация
+pub use infrastructure::Claims;
+pub use infrastructure::issue_guest_token;
+pub use infrastructure::verify_token;
 
 /// In-memory реализация [`RoomRepository`].
 ///
@@ -152,6 +156,11 @@ pub use infrastructure::ConnectionRegistry;
 ///
 /// Параметризован трейтом [`RoomRepository`], что обеспечивает инверсию зависимостей (DIP).
 pub use orchestrator::Orchestrator;
+// ─────────────────────────────────────────────────────────────
+// 5. Transport: публичные компоненты
+// ─────────────────────────────────────────────────────────────
+pub use transport::auth_middleware;
+pub use transport::AuthState;
 
 // ─────────────────────────────────────────────────────────────
 // ВНУТРЕННИЕ ТИПЫ (не реэкспортируются)

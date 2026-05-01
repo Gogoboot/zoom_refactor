@@ -37,6 +37,10 @@ pub enum AppError {
     #[error("Configuration error: {0}")]
     Config(String),
 
+    /// Ошибка аутентификации: невалидный токен, истёкший токен и т.д.
+    #[error("Authentication error: {0}")]
+    Auth(String),
+
     /// Ошибка ввода-вывода: проблемы с файлами, сетью, сокетами.
     ///
     /// Автоматическая конвертация: `std::io::Error` → `AppError::Io`

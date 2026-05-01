@@ -9,6 +9,7 @@
 //! | `ADMIN_TOKEN` | Токен для /admin/* endpoints    | обязателен   |
 //! | `TURN_SECRET` | Секрет для TURN credentials     | обязателен   |
 //! | `DOMAIN`      | Домен сервера                   | `gohub.su`   |
+//! | `JWT_SECRET`  | Секрет для подписи JWT токенов  | обязателен   |
 
 use crate::error::{AppError, AppResult};
 use serde::Deserialize;
@@ -25,7 +26,9 @@ pub enum LogLevel {
 }
 
 impl Default for LogLevel {
-    fn default() -> Self { Self::Debug }
+    fn default() -> Self {
+        Self::Debug
+    }
 }
 
 impl FromStr for LogLevel {
@@ -34,12 +37,13 @@ impl FromStr for LogLevel {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.to_lowercase().as_str() {
             "error" => Ok(Self::Error),
-            "warn"  => Ok(Self::Warn),
-            "info"  => Ok(Self::Info),
+            "warn" => Ok(Self::Warn),
+            "info" => Ok(Self::Info),
             "debug" => Ok(Self::Debug),
             "trace" => Ok(Self::Trace),
             _ => Err(format!(
-                "Unknown log level: '{}'. Valid: error, warn, info, debug, trace", s
+                "Unknown log level: '{}'. Valid: error, warn, info, debug, trace",
+                s
             )),
         }
     }
@@ -49,8 +53,8 @@ impl LogLevel {
     pub fn as_str(self) -> &'static str {
         match self {
             Self::Error => "error",
-            Self::Warn  => "warn",
-            Self::Info  => "info",
+            Self::Warn => "warn",
+            Self::Info => "info",
             Self::Debug => "debug",
             Self::Trace => "trace",
         }
@@ -74,10 +78,14 @@ pub struct Config {
     pub domain: String,
 
     pub turn_secret: String,
+
+    pub jwt_secret: String,
 }
 
 #[inline]
-fn default_port() -> u16 { 3000 }
+fn default_port() -> u16 {
+    3000
+}
 
 fn default_domain() -> String {
     "gohub.su".to_string()
@@ -92,19 +100,25 @@ impl Config {
 
         if config.port == 0 {
             return Err(AppError::Config(
-                "PORT cannot be 0. Use 1-65535.".to_string()
+                "PORT cannot be 0. Use 1-65535.".to_string(),
             ));
         }
 
         if config.admin_token.is_empty() {
             return Err(AppError::Config(
-                "ADMIN_TOKEN is required. Set it in .env file.".to_string()
+                "ADMIN_TOKEN is required. Set it in .env file.".to_string(),
             ));
         }
 
         if config.turn_secret.is_empty() {
             return Err(AppError::Config(
-                "TURN_SECRET is required. Set it in .env file.".to_string()
+                "TURN_SECRET is required. Set it in .env file.".to_string(),
+            ));
+        }
+
+        if config.jwt_secret.is_empty() {
+            return Err(AppError::Config(
+                "JWT_SECRET is required. Set it in .env file.".to_string(),
             ));
         }
 
@@ -133,10 +147,10 @@ mod tests {
         std::env::set_var("PORT", "0");
         std::env::set_var("ADMIN_TOKEN", "test_token");
         std::env::remove_var("LOG_LEVEL");
-        
+
         let result = Config::from_env();
         assert!(result.is_err());
-        
+
         std::env::remove_var("PORT");
         std::env::remove_var("ADMIN_TOKEN");
     }
