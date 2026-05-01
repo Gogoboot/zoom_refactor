@@ -33,18 +33,9 @@ export function createWebSocketAdapter({ onMessage, onStatusChange }) {
   }
 
   async function connect(url = DEFAULT_WS) {
-    if (reconnectTimer) {
-      clearTimeout(reconnectTimer);
-      reconnectTimer = null;
-    }
-    if (wsConnectTimer) {
-      clearTimeout(wsConnectTimer);
-      wsConnectTimer = null;
-    }
-    if (ws) {
-      ws.close();
-      ws = null;
-    }
+    if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
+    if (wsConnectTimer) { clearTimeout(wsConnectTimer); wsConnectTimer = null; }
+    if (ws) { ws.close(); ws = null; }
 
     // Принудительно wss на HTTPS
     if (window.location.protocol === "https:" && !url.startsWith("wss")) {
@@ -52,7 +43,7 @@ export function createWebSocketAdapter({ onMessage, onStatusChange }) {
     }
     if (!url.endsWith("/ws")) url = url.replace(/\/+$/, "") + "/ws";
 
-    // Сначала получаем токен
+    // Получаем токен
     let token = null;
     try {
       const res = await fetch("https://meet.gohub.su/auth/guest");
@@ -61,29 +52,6 @@ export function createWebSocketAdapter({ onMessage, onStatusChange }) {
     } catch (e) {
       console.warn("Не удалось получить токен:", e);
     }
-
-    onStatusChange("connecting");
-    const wsUrl = token ? `${url}?token=${token}` : url;
-    ws = new WebSocket(wsUrl); // ← wsUrl с токеном!
-
-    if (reconnectTimer) {
-      clearTimeout(reconnectTimer);
-      reconnectTimer = null;
-    }
-    if (wsConnectTimer) {
-      clearTimeout(wsConnectTimer);
-      wsConnectTimer = null;
-    }
-    if (ws) {
-      ws.close();
-      ws = null;
-    }
-
-    // Принудительно wss на HTTPS
-    if (window.location.protocol === "https:" && !url.startsWith("wss")) {
-      url = url.replace("ws:", "wss:");
-    }
-    if (!url.endsWith("/ws")) url = url.replace(/\/+$/, "") + "/ws";
 
     onStatusChange("connecting");
     const wsUrl = token ? `${url}?token=${token}` : url;
@@ -98,10 +66,7 @@ export function createWebSocketAdapter({ onMessage, onStatusChange }) {
     }, 10000);
 
     ws.onopen = () => {
-      if (wsConnectTimer) {
-        clearTimeout(wsConnectTimer);
-        wsConnectTimer = null;
-      }
+      if (wsConnectTimer) { clearTimeout(wsConnectTimer); wsConnectTimer = null; }
       reconnectAttempts = 0;
       reconnectDelay = 1000;
       isManualDisconnect = false;
@@ -119,10 +84,7 @@ export function createWebSocketAdapter({ onMessage, onStatusChange }) {
     };
 
     ws.onclose = (event) => {
-      if (wsConnectTimer) {
-        clearTimeout(wsConnectTimer);
-        wsConnectTimer = null;
-      }
+      if (wsConnectTimer) { clearTimeout(wsConnectTimer); wsConnectTimer = null; }
       ws = null;
       if (!isManualDisconnect) scheduleReconnect(url);
       else onStatusChange("disconnected");
@@ -147,18 +109,9 @@ export function createWebSocketAdapter({ onMessage, onStatusChange }) {
 
   function disconnect() {
     isManualDisconnect = true;
-    if (reconnectTimer) {
-      clearTimeout(reconnectTimer);
-      reconnectTimer = null;
-    }
-    if (wsConnectTimer) {
-      clearTimeout(wsConnectTimer);
-      wsConnectTimer = null;
-    }
-    if (ws) {
-      ws.close();
-      ws = null;
-    }
+    if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
+    if (wsConnectTimer) { clearTimeout(wsConnectTimer); wsConnectTimer = null; }
+    if (ws) { ws.close(); ws = null; }
     messageBuffer = [];
     onStatusChange("disconnected");
   }
