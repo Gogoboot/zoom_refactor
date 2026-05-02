@@ -208,9 +208,11 @@ async fn health_ready_handler(State(state): State<AppState>) -> Result<&'static 
 
 /// ICE servers handler — возвращает STUN/TURN credentials
 async fn ice_servers_handler(
+    
     State(state): State<AppState>,
     Extension(claims): Extension<Claims>,  // ← добавить
 ) -> Json<serde_json::Value> {
+    tracing::info!(user_id = %claims.user_id, "🧊 ICE servers запрошены");
     use base64::{engine::general_purpose::STANDARD, Engine};
     use hmac::{Hmac, Mac};
     use sha1::Sha1;
