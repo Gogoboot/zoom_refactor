@@ -39,7 +39,6 @@ export function createWebRTCAdapter({
     pc = new RTCPeerConnection({ iceServers });
 
     // если нет медиа — создаём "пустой" transceiver
-    pc.addTransceiver("video", { direction: "recvonly" });
 
     // DataChannel — создаёт тот кто делает offer
     dataChannel = pc.createDataChannel("chat");
@@ -65,11 +64,12 @@ export function createWebRTCAdapter({
 
     let remoteStream = new MediaStream();
 
-    pc.ontrack = (e) => {
-      console.log("ONTRACK:", e.track.kind, "streams:", e.streams.length);
-      remoteStream.addTrack(e.track);
-      onRemoteStream(remoteStream);
-    };
+pc.ontrack = (e) => {
+    console.log('ONTRACK:', e.track.kind, 'streams:', e.streams.length); // TODO: удалить
+    if (e.streams && e.streams[0]) {
+        onRemoteStream(e.streams[0]);
+    }
+};
 
     pc.onconnectionstatechange = () => {
       console.log("STATE", pc.connectionState);
@@ -167,25 +167,11 @@ export function createWebRTCAdapter({
       stream.getTracks().map((t) => t.kind + " " + t.enabled),
     );
 
-    stream.getTracks().forEach((t) => {
-      // Ищем существующий transceiver для этого типа (video/audio)
-      const existing = pc
-        .getTransceivers()
-        .find(
-          (tc) =>
-            tc.receiver.track.kind === t.kind && tc.direction === "recvonly",
-        );
-
-      if (existing) {
-        // Переиспользуем существующий — меняем direction и добавляем sender
-        existing.sender.replaceTrack(t);
-        existing.direction = "sendrecv";
-      } else {
-        // Нового типа трек (например audio) — добавляем обычно
-        pc.addTrack(t, stream);
-      }
-    });
-  }
+function addTracks(stream) {
+    if (!stream || !pc) return;
+    console.log('TRACKS:', stream.getTracks().map(t => t.kind + ':' + t.enabled)); // TODO: удалить
+    stream.getTracks().forEach((t) => pc.addTrack(t, stream));
+}
 
   async function createOffer() {
     const offer = await pc.createOffer();
