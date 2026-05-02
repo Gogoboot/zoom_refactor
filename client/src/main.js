@@ -463,6 +463,9 @@ function handleReset() {
 // 8. ОБРАБОТЧИКИ КНОПОК КОМНАТЫ
 // ==========================================
 preview.onStart(async ({ stream, micEnabled, camEnabled }) => {
+
+  addStatus(`🎬 Треки: ${stream ? stream.getTracks().map(t => t.kind + ':' + t.enabled).join(', ') : 'нет стрима'}`);
+
   if (stream) {
     const audioTrack = stream.getAudioTracks()[0];
     const videoTrack = stream.getVideoTracks()[0];
