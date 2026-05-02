@@ -10,18 +10,17 @@ export function createWebRTCAdapter({
   token,
   serverUrl,
 }) {
-
   async function fetchIceServers() {
     try {
       const url = `${serverUrl}/api/ice-servers`;
-      const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
       const res = await fetch(url, { headers });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       return data.iceServers;
     } catch (e) {
-      console.warn('Не удалось получить ICE серверы, используем fallback:', e);
-      return [{ urls: 'stun:stun.l.google.com:19302' }];
+      console.warn("Не удалось получить ICE серверы, используем fallback:", e);
+      return [{ urls: "stun:stun.l.google.com:19302" }];
     }
   }
 
@@ -64,10 +63,12 @@ export function createWebRTCAdapter({
       }
     };
 
+    let remoteStream = new MediaStream();
+
     pc.ontrack = (e) => {
-      if (e.streams && e.streams[0]) {
-        onRemoteStream(e.streams[0]);
-      }
+      console.log("ONTRACK:", e.track.kind, "streams:", e.streams.length);
+      remoteStream.addTrack(e.track);
+      onRemoteStream(remoteStream);
     };
 
     pc.onconnectionstatechange = () => {
@@ -161,7 +162,10 @@ export function createWebRTCAdapter({
   // СТАЛО:
   function addTracks(stream) {
     if (!stream || !pc) return;
-    console.log('TRACKS:', stream.getTracks().map(t => t.kind + ' ' + t.enabled));
+    console.log(
+      "TRACKS:",
+      stream.getTracks().map((t) => t.kind + " " + t.enabled),
+    );
 
     stream.getTracks().forEach((t) => {
       // Ищем существующий transceiver для этого типа (video/audio)
