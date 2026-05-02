@@ -161,6 +161,7 @@ export function createWebRTCAdapter({
   // СТАЛО:
   function addTracks(stream) {
     if (!stream || !pc) return;
+    console.log('TRACKS:', stream.getTracks().map(t => t.kind + ' ' + t.enabled));
 
     stream.getTracks().forEach((t) => {
       // Ищем существующий transceiver для этого типа (video/audio)
