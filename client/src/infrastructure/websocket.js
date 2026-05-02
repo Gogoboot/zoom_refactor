@@ -7,7 +7,7 @@ const DEFAULT_WS = "wss://meet.gohub.su/ws";
 const MAX_RECONNECT_ATTEMPTS = 10;
 const MAX_RECONNECT_DELAY = 30000;
 
-export function createWebSocketAdapter({ onMessage, onStatusChange }) {
+export function createWebSocketAdapter({ onMessage, onStatusChange, onTokenNeeded }) {
   let ws = null;
   let reconnectAttempts = 0;
   let reconnectDelay = 1000;
@@ -32,7 +32,7 @@ export function createWebSocketAdapter({ onMessage, onStatusChange }) {
     }
   }
 
-  async function connect(url = DEFAULT_WS) {
+async function connect(url = DEFAULT_WS, token = null) {
     // === 1. Очистка предыдущего состояния (один раз) ===
     if (reconnectTimer) {
       clearTimeout(reconnectTimer);
@@ -57,14 +57,7 @@ export function createWebSocketAdapter({ onMessage, onStatusChange }) {
     }
 
     // === 3. Получение токена (опционально) ===
-    let token = null;
-    try {
-      const res = await fetch("https://meet.gohub.su/auth/guest");
-      const data = await res.json();
-      token = data.token;
-    } catch (e) {
-      console.warn("Не удалось получить токен:", e);
-    }
+
 
     // === 4. Создание WebSocket ===
     onStatusChange("connecting");
@@ -127,7 +120,7 @@ export function createWebSocketAdapter({ onMessage, onStatusChange }) {
     const delay = Math.min(reconnectDelay, MAX_RECONNECT_DELAY);
     reconnectDelay *= 2;
     onStatusChange("reconnecting", `Переподключение... (${delay / 1000}с)`);
-    reconnectTimer = setTimeout(() => connect(url), delay);
+reconnectTimer = setTimeout(() => onTokenNeeded(url), delay);
   }
 
   function disconnect() {

@@ -2,27 +2,29 @@
  * webrtc.js — Адаптер WebRTC
  * Управляет PeerConnection и DataChannel
  */
-
-const ICE_SERVERS_URL = "https://gohub.su/api/ice-servers";
-
-async function fetchIceServers() {
-  try {
-    const res = await fetch(ICE_SERVERS_URL);
-    if (!res.ok) throw new Error("Failed to fetch ICE servers");
-    const data = await res.json();
-    return data.iceServers;
-  } catch (e) {
-    console.warn("Не удалось получить ICE серверы, используем fallback:", e);
-    return [{ urls: "stun:stun.l.google.com:19302" }];
-  }
-}
-
 export function createWebRTCAdapter({
   onRemoteStream,
   onIceCandidate,
   onDataMessage,
   onConnectionState,
+  token,
+  serverUrl,
 }) {
+
+  async function fetchIceServers() {
+    try {
+      const url = `${serverUrl}/api/ice-servers`;
+      const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+      const res = await fetch(url, { headers });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      return data.iceServers;
+    } catch (e) {
+      console.warn('Не удалось получить ICE серверы, используем fallback:', e);
+      return [{ urls: 'stun:stun.l.google.com:19302' }];
+    }
+  }
+
   let pc = null;
   let dataChannel = null;
   let iceCandidateBuffer = [];
@@ -178,7 +180,7 @@ export function createWebRTCAdapter({
         pc.addTrack(t, stream);
       }
     });
-  };
+  }
 
   async function createOffer() {
     const offer = await pc.createOffer();

@@ -6,6 +6,7 @@
 import { createWebSocketAdapter } from "./infrastructure/websocket.js";
 import { createWebRTCAdapter } from "./infrastructure/webrtc.js";
 import { createStorage } from "./infrastructure/storage.js";
+import { fetchToken } from "./infrastructure/auth.js";
 
 import { createRoom } from "./application/createRoom.js";
 import { joinRoom } from "./application/joinRoom.js";
@@ -250,6 +251,7 @@ let webrtc = null;
 let remoteParticipantId = null;
 
 async function initWebRTC() {
+  const { token, serverUrl } = state.get();
   webrtc = createWebRTCAdapter({
     onRemoteStream: (stream) => {
       els.remoteVideo.srcObject = stream;
@@ -297,9 +299,17 @@ async function initWebRTC() {
     onConnectionState: (connectionState) => {
       addStatus(`🔌 WebRTC: ${connectionState}`);
     },
+    token,
+    serverUrl,
   });
 
   await webrtc.init();
+}
+
+async function connectToServer(url) {
+  const { token, httpUrl } = await fetchToken(url);
+  state.set({ token, serverUrl: httpUrl });
+  ws.connect(url, token);
 }
 
 // ==========================================
@@ -411,6 +421,7 @@ const ws = createWebSocketAdapter({
         addStatus(`⚠️ Неизвестный тип сообщения: ${msg.type}`, true);
     }
   },
+  onTokenNeeded: (url) => connectToServer(url),
 });
 
 // ==========================================
@@ -513,7 +524,7 @@ els.leaveBtn.addEventListener("click", () => {
     onLeave: handleReset,
   });
   addStatus("🚪 Вы покинули комнату");
-  setTimeout(() => ws.connect(els.serverUrlInput.value.trim()), 100);
+setTimeout(() => connectToServer(els.serverUrlInput.value.trim()), 100);
 });
 
 // ==========================================
@@ -547,7 +558,7 @@ controls.onHangupClick(() => {
     onLeave: handleReset,
   });
   addStatus("📵 Звонок завершён");
-  setTimeout(() => ws.connect(els.serverUrlInput.value.trim()), 100);
+setTimeout(() => connectToServer(els.serverUrlInput.value.trim()), 100);
 });
 
 controls.onSwapClick(() => {
@@ -610,9 +621,8 @@ els.fileInput.addEventListener("change", async () => {
       text: file.name,
       isOwn: true,
       sender: "Вы",
-      fileUrl: URL.createObjectURL(file)
+      fileUrl: URL.createObjectURL(file),
     });
-
 
     addStatus(`📎 Файл отправлен: ${file.name}`);
   } catch (err) {
@@ -695,12 +705,12 @@ els.saveServerBtn.addEventListener("click", () => {
   if (url) {
     storage.set("ws_server_url", url);
     addStatus(`💾 Сервер сохранён: ${url}`);
-    ws.connect(url);
+    connectToServer(url);
   }
 });
 
 els.connectBtn.addEventListener("click", () => {
-  ws.connect(els.serverUrlInput.value.trim());
+  connectToServer(els.serverUrlInput.value.trim());
 });
 
 /* ==========================================
@@ -739,7 +749,7 @@ videoLayout.reset();
 controls.reset();
 chat.reset();
 // Автоподключение при загрузке страницы
-ws.connect(els.serverUrlInput.value.trim());
+connectToServer(els.serverUrlInput.value.trim());
 
 /* Проверяем URL — если есть roomId, автоматически входим в комнату */
 const roomIdFromUrl = getRoomIdFromUrl();
