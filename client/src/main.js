@@ -701,6 +701,7 @@ els.fileInput.addEventListener("change", async () => {
     addStatus(`📎 Файл отправлен: ${file.name}`);
   } catch (err) {
     addStatus(`❌ Ошибка отправки файла`, true);
+    console.error("sendFile error:", err);
   }
 
   els.fileInput.value = "";
