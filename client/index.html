@@ -65,8 +65,7 @@
             class="btn btn-secondary btn-sm"
             title="Скопировать ссылку"
             disabled
-          >
-          </button>
+          ></button>
           <button type="button" id="joinBtn" class="btn btn-secondary">
             Войти
           </button>
@@ -186,7 +185,7 @@
             >
               📎
             </button>
-            
+
             <input
               type="text"
               id="chatInput"
@@ -386,6 +385,41 @@
           </button>
           <button type="button" id="previewStartBtn" class="btn btn-primary">
             Начать →
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ПОДЕЛИТЬСЯ КОМНАТОЙ -->
+    <div id="shareModal" class="modal-overlay">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Комната создана</h2>
+          <button type="button" id="shareModalCloseBtn" class="close-btn">
+            &times;
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>Отправьте ссылку собеседнику:</p>
+          <div class="share-link-group">
+            <input
+              type="text"
+              id="shareLinkInput"
+              class="share-link-input"
+              readonly
+            />
+            <button
+              type="button"
+              id="shareCopyBtn"
+              class="btn btn-primary btn-sm"
+            >
+              Скопировать
+            </button>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="shareModalOkBtn" class="btn btn-secondary">
+            Закрыть
           </button>
         </div>
       </div>

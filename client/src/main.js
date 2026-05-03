@@ -25,6 +25,9 @@ import { createStatsComponent } from "./presentation/components/stats.js";
 import { createPreviewComponent } from "./presentation/components/preview.js";
 // Импортируем компонент drawer — выдвижная панель логов и настроек
 import { createDrawerComponent } from "./presentation/components/drawer.js";
+
+import { createShareModal } from "./presentation/components/shareModal.js";
+
 /* Роутер — управление URL */
 import {
   getRoomIdFromUrl,
@@ -131,6 +134,13 @@ const els = {
   modalCloseBtn: $("modalCloseBtn"),
   modalOkBtn: $("modalOkBtn"),
 
+  // Поделиться комнатой
+  shareModal: $("shareModal"),
+  shareLinkInput: $("shareLinkInput"),
+  shareCopyBtn: $("shareCopyBtn"),
+  shareModalCloseBtn: $("shareModalCloseBtn"),
+  shareModalOkBtn: $("shareModalOkBtn"),
+
   // Тема и вкладки
   statusLog: $("statusLog"),
 };
@@ -193,6 +203,14 @@ const drawer = createDrawerComponent({
   drawerOverlayEl: els.drawerOverlay,
   drawerCloseBtn: els.drawerCloseBtn,
   controlsBar: document.querySelector(".controls-bar"), // передаём панель кнопок
+});
+
+const shareModal = createShareModal({
+  modalEl: els.shareModal,
+  linkEl: els.shareLinkInput,
+  copyBtn: els.shareCopyBtn,
+  closeBtn: els.shareModalCloseBtn,
+  okBtn: els.shareModalOkBtn,
 });
 
 // ==========================================
@@ -339,6 +357,7 @@ const ws = createWebSocketAdapter({
         setRoomUrl(room.id);
         addStatus(`✅ Комната создана: ${room.id}`);
         addStatus(`🔗 Ссылка: ${getRoomLink(room.id)}`);
+        shareModal.show(getRoomLink(room.id));
         break;
       }
       case "room_joined": {
