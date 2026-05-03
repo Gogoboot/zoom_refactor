@@ -6,6 +6,7 @@ export function createWebRTCAdapter({
   onIceCandidate,
   onLocalDescription,
   onDataMessage,
+  onDataChannelMessage,
   onConnectionState,
   token,
   serverUrl,
@@ -114,33 +115,14 @@ export function createWebRTCAdapter({
     };
   }
 
-  let incomingFiles = {};
-
   function setupDataChannel(channel) {
+    channel.binaryType = "arraybuffer";
     channel.onopen = () => onDataMessage({ type: "channel_open" });
     channel.onclose = () => onDataMessage({ type: "channel_close" });
     channel.onmessage = (e) => {
-      try {
-        const msg = JSON.parse(e.data);
-        if (msg.type === "file_meta") {
-          incomingFiles[msg.id] = { name: msg.name, chunks: [] };
-          return;
-        }
-        if (msg.type === "file_chunk") {
-          incomingFiles[msg.id].chunks.push(new Uint8Array(msg.chunk));
-          return;
-        }
-        if (msg.type === "file_end") {
-          const file = incomingFiles[msg.id];
-          const blob = new Blob(file.chunks);
-          const url = URL.createObjectURL(blob);
-          onDataMessage({ type: "file", name: file.name, url });
-          delete incomingFiles[msg.id];
-          return;
-        }
-        onDataMessage(msg);
-      } catch (err) {
-        console.warn("Ошибка DataChannel:", err);
+      const result = onDataChannelMessage(e.data);
+      if (result !== undefined) {
+        onDataMessage(result);
       }
     };
   }
@@ -166,8 +148,7 @@ export function createWebRTCAdapter({
   }
 
   async function handleOffer(sdpStr) {
-    const offerCollision =
-      makingOffer || pc.signalingState !== "stable";
+    const offerCollision = makingOffer || pc.signalingState !== "stable";
 
     if (!isPolite && offerCollision) {
       console.warn("Impolite: ignoring colliding offer");
@@ -206,28 +187,6 @@ export function createWebRTCAdapter({
     }
   }
 
-  async function sendFile(file) {
-    const chunkSize = 16 * 1024;
-    const id = crypto.randomUUID();
-    dataChannel.send(
-      JSON.stringify({ type: "file_meta", id, name: file.name, size: file.size })
-    );
-    let offset = 0;
-    while (offset < file.size) {
-      const chunk = file.slice(offset, offset + chunkSize);
-      const buffer = await chunk.arrayBuffer();
-      dataChannel.send(
-        JSON.stringify({
-          type: "file_chunk",
-          id,
-          chunk: Array.from(new Uint8Array(buffer)),
-        })
-      );
-      offset += chunkSize;
-    }
-    dataChannel.send(JSON.stringify({ type: "file_end", id }));
-  }
-
   async function getStats() {
     if (!pc) return null;
     return await pc.getStats();
@@ -238,11 +197,17 @@ export function createWebRTCAdapter({
     remoteStream = null;
     makingOffer = false;
     isPolite = false;
-    if (dataChannel) { dataChannel.close(); dataChannel = null; }
-    if (pc) { pc.close(); pc = null; }
+    if (dataChannel) {
+      dataChannel.close();
+      dataChannel = null;
+    }
+    if (pc) {
+      pc.close();
+      pc = null;
+    }
   }
 
-// Явный триггер negotiation — нужен когда треки добавлены до появления remote peer
+  // Явный триггер negotiation — нужен когда треки добавлены до появления remote peer
   async function triggerNegotiation() {
     if (!pc) return;
     try {
@@ -259,6 +224,7 @@ export function createWebRTCAdapter({
   return {
     init,
     addTracks,
+    getBufferedAmount: () => dataChannel?.bufferedAmount ?? 0,
     ensureReceive,
     setRole,
     handleOffer,
@@ -266,7 +232,6 @@ export function createWebRTCAdapter({
     handleIceCandidate,
     sendData,
     getStats,
-    sendFile,
     triggerNegotiation,
     close,
   };

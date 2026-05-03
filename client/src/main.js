@@ -9,6 +9,7 @@ import { createStorage } from "./infrastructure/storage.js";
 import { fetchToken } from "./infrastructure/auth.js";
 
 import { createRoom } from "./application/createRoom.js";
+import { createFileTransfer } from "./application/fileTransfer.js";
 import { joinRoom } from "./application/joinRoom.js";
 import { leaveRoom } from "./application/leaveRoom.js";
 import { sendMessage } from "./application/sendMessage.js";
@@ -267,6 +268,7 @@ function enableRoomButtons(isInRoom) {
 // ==========================================
 let webrtc = null;
 let remoteParticipantId = null;
+let fileTransfer = null;
 
 async function initWebRTC() {
   const { token, serverUrl } = state.get();
@@ -319,6 +321,10 @@ async function initWebRTC() {
         );
       }
     },
+    onDataChannelMessage: (data) => {
+      if (!fileTransfer) return;
+      return fileTransfer.receive(data);
+    },
     onConnectionState: (connectionState) => {
       addStatus(`🔌 WebRTC: ${connectionState}`);
     },
@@ -326,7 +332,22 @@ async function initWebRTC() {
     serverUrl,
   });
 
-  await webrtc.init();
+await webrtc.init();
+
+  fileTransfer = createFileTransfer({
+    sendData: (data) => webrtc.sendData(data),
+    getBufferedAmount: () => webrtc.getBufferedAmount(),
+    onProgress: ({ id, name, percent, direction }) => {
+      addStatus(`📦 ${direction === "upload" ? "Отправка" : "Получение"} ${name}: ${percent}%`);
+    },
+    onFileReceived: ({ name, blob }) => {
+      const url = URL.createObjectURL(blob);
+      onDataMessage({ type: "file", name, url });
+    },
+    onError: ({ id, error }) => {
+      addStatus(`❌ Ошибка передачи файла: ${error}`, true);
+    },
+  });
 }
 
 async function connectToServer(url) {
@@ -475,6 +496,7 @@ function handleReset() {
   if (webrtc) {
     webrtc.close();
     webrtc = null;
+    fileTransfer = null;
   }
 
   els.localVideo.srcObject = null;
@@ -660,7 +682,7 @@ els.fileInput.addEventListener("change", async () => {
   if (!file) return;
 
   try {
-    await webrtc.sendFile(file);
+    await fileTransfer.sendFile(file);
 
     chat.addMessage({
       text: file.name,
