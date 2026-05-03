@@ -339,10 +339,19 @@ async function connectToServer(url) {
 // 6. WEBSOCKET АДАПТЕР
 // ==========================================
 const ws = createWebSocketAdapter({
-  onStatusChange: (status, text) => {
+onStatusChange: (status, text) => {
     updateServerStatus(status, text);
     addStatus(text || status);
     state.set({ isConnected: status === "connected" });
+    if (status === "connected") {
+      const { pendingAction } = state.get();
+      const roomId = els.roomIdInput.value.trim();
+      if (pendingAction === "join" && roomId) {
+        preview.show("join").catch(() => {
+          showModal("Нет доступа к камере", "Разрешите доступ в браузере.");
+        });
+      }
+    }
   },
   onMessage: async (msg) => {
     addStatus(`📥 Получено: ${msg.type}`);
@@ -792,6 +801,7 @@ const roomIdFromUrl = getRoomIdFromUrl();
 if (roomIdFromUrl) {
   els.roomIdInput.value = roomIdFromUrl;
   addStatus(`🔗 Вход по ссылке в комнату: ${roomIdFromUrl}`);
+  state.set({ pendingAction: "join" });
 }
 
 window.sendTestFile = async (file) => {
