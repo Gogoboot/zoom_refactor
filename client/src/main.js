@@ -355,6 +355,7 @@ fileTransfer = createFileTransfer({
       addStatus(`❌ Ошибка передачи файла: ${error}`, true);
     },
   });
+}
 
 async function connectToServer(url) {
   const { token, httpUrl } = await fetchToken(url);
