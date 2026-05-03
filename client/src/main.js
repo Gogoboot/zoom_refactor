@@ -332,13 +332,15 @@ async function initWebRTC() {
     serverUrl,
   });
 
-await webrtc.init();
+  await webrtc.init();
 
-fileTransfer = createFileTransfer({
+  fileTransfer = createFileTransfer({
     sendData: (data) => webrtc.sendData(data),
     getBufferedAmount: () => webrtc.getBufferedAmount(),
     onProgress: ({ id, name, percent, direction }) => {
-      addStatus(`📦 ${direction === "upload" ? "Отправка" : "Получение"} ${name}: ${percent}%`);
+      addStatus(
+        `📦 ${direction === "upload" ? "Отправка" : "Получение"} ${name}: ${percent}%`,
+      );
     },
     onFileReceived: ({ name, blob }) => {
       const url = URL.createObjectURL(blob);
@@ -348,7 +350,7 @@ fileTransfer = createFileTransfer({
           isOwn: false,
           sender: "Собеседник",
           fileUrl: url,
-        })
+        }),
       );
     },
     onError: ({ id, error }) => {
@@ -367,7 +369,7 @@ async function connectToServer(url) {
 // 6. WEBSOCKET АДАПТЕР
 // ==========================================
 const ws = createWebSocketAdapter({
-onStatusChange: (status, text) => {
+  onStatusChange: (status, text) => {
     updateServerStatus(status, text);
     addStatus(text || status);
     state.set({ isConnected: status === "connected" });
@@ -414,7 +416,7 @@ onStatusChange: (status, text) => {
           room &&
           participant.id !== room.participantId
         ) {
-remoteParticipantId = participant.id;
+          remoteParticipantId = participant.id;
           webrtc.setRole(msg.role);
           await webrtc.triggerNegotiation();
         }
@@ -689,8 +691,7 @@ els.fileInput.addEventListener("change", async () => {
   if (!file) return;
 
   try {
-    await fileTransfer.sendFile(file);
-
+    await fileTransfer.send(file);
     chat.addMessage({
       text: file.name,
       isOwn: true,
