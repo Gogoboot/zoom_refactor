@@ -334,7 +334,7 @@ async function initWebRTC() {
 
 await webrtc.init();
 
-  fileTransfer = createFileTransfer({
+fileTransfer = createFileTransfer({
     sendData: (data) => webrtc.sendData(data),
     getBufferedAmount: () => webrtc.getBufferedAmount(),
     onProgress: ({ id, name, percent, direction }) => {
@@ -342,13 +342,19 @@ await webrtc.init();
     },
     onFileReceived: ({ name, blob }) => {
       const url = URL.createObjectURL(blob);
-      onDataMessage({ type: "file", name, url });
+      chat.addMessage(
+        createMessage({
+          text: name,
+          isOwn: false,
+          sender: "Собеседник",
+          fileUrl: url,
+        })
+      );
     },
     onError: ({ id, error }) => {
       addStatus(`❌ Ошибка передачи файла: ${error}`, true);
     },
   });
-}
 
 async function connectToServer(url) {
   const { token, httpUrl } = await fetchToken(url);
