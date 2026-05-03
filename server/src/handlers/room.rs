@@ -97,6 +97,7 @@ pub async fn handle_join_room<R: RoomRepository>(
             id: participant_id.clone(),
             display_name: display_name.clone(),
         },
+        role: "polite".to_string(),
     };
     notify_room_except(repo, registry, &room_id, &participant_id, joined_msg).await?;
 
@@ -117,6 +118,7 @@ pub async fn handle_join_room<R: RoomRepository>(
         room_id: room_id.clone(),
         participants: participants_list,
         participant_id: participant_id.clone(),
+        role: "polite".to_string(),
     };
     let msg = serde_json::to_string(&room_joined_msg)?;
 

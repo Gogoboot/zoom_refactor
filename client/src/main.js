@@ -261,6 +261,11 @@ async function initWebRTC() {
       stats.start(() => webrtc.getStats());
       addStatus("🎥 Получен удалённый поток");
     },
+    onLocalDescription: ({ type, sdp }) => {
+      if (!remoteParticipantId) return;
+      ws.send({ type, target_id: remoteParticipantId, sdp });
+      addStatus(`📤 Отправлен ${type} участнику ${remoteParticipantId}`);
+    },
     onIceCandidate: (candidate) => {
       if (remoteParticipantId) {
         ws.send({
@@ -340,6 +345,7 @@ const ws = createWebSocketAdapter({
         const room = roomFromServer(msg);
         state.set({ room, isInRoom: true });
         enableRoomButtons(true);
+        webrtc.setRole(msg.role);
         addStatus(`✅ Вы вошли в комнату. Ваш ID: ${room.participantId}`);
         break;
       }
@@ -352,10 +358,9 @@ const ws = createWebSocketAdapter({
           room &&
           participant.id !== room.participantId
         ) {
-          remoteParticipantId = participant.id;
-          const sdp = await webrtc.createOffer();
-          ws.send({ type: "offer", target_id: remoteParticipantId, sdp });
-          addStatus(`📞 Offer отправлен участнику ${remoteParticipantId}`);
+remoteParticipantId = participant.id;
+          webrtc.setRole(msg.role);
+          await webrtc.triggerNegotiation();
         }
         break;
       }
@@ -363,9 +368,8 @@ const ws = createWebSocketAdapter({
         const { room } = state.get();
         if (msg.from_id !== room?.participantId) {
           remoteParticipantId = msg.from_id;
-          const sdp = await webrtc.handleOffer(msg.sdp);
-          ws.send({ type: "answer", target_id: msg.from_id, sdp });
-          addStatus(`✅ Answer отправлен участнику ${msg.from_id}`);
+          await webrtc.handleOffer(msg.sdp);
+          // answer уходит автоматически через onLocalDescription
         }
         break;
       }
@@ -463,8 +467,16 @@ function handleReset() {
 // 8. ОБРАБОТЧИКИ КНОПОК КОМНАТЫ
 // ==========================================
 preview.onStart(async ({ stream, micEnabled, camEnabled }) => {
-
-  addStatus(`🎬 Треки: ${stream ? stream.getTracks().map(t => t.kind + ':' + t.enabled).join(', ') : 'нет стрима'}`);
+  addStatus(
+    `🎬 Треки: ${
+      stream
+        ? stream
+            .getTracks()
+            .map((t) => t.kind + ":" + t.enabled)
+            .join(", ")
+        : "нет стрима"
+    }`,
+  );
 
   if (stream) {
     const audioTrack = stream.getAudioTracks()[0];
@@ -486,6 +498,8 @@ preview.onStart(async ({ stream, micEnabled, camEnabled }) => {
   await initWebRTC();
   if (stream) {
     webrtc.addTracks(stream);
+  } else {
+    webrtc.ensureReceive();
   }
   const { pendingAction, room } = state.get();
   if (pendingAction === "create") {
@@ -527,7 +541,7 @@ els.leaveBtn.addEventListener("click", () => {
     onLeave: handleReset,
   });
   addStatus("🚪 Вы покинули комнату");
-setTimeout(() => connectToServer(els.serverUrlInput.value.trim()), 100);
+  setTimeout(() => connectToServer(els.serverUrlInput.value.trim()), 100);
 });
 
 // ==========================================
@@ -561,7 +575,7 @@ controls.onHangupClick(() => {
     onLeave: handleReset,
   });
   addStatus("📵 Звонок завершён");
-setTimeout(() => connectToServer(els.serverUrlInput.value.trim()), 100);
+  setTimeout(() => connectToServer(els.serverUrlInput.value.trim()), 100);
 });
 
 controls.onSwapClick(() => {

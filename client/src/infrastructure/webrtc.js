@@ -1,10 +1,10 @@
 /**
- * webrtc.js — Адаптер WebRTC
- * Управляет PeerConnection и DataChannel
+ * webrtc.js — Адаптер WebRTC (Perfect Negotiation)
  */
 export function createWebRTCAdapter({
   onRemoteStream,
   onIceCandidate,
+  onLocalDescription,
   onDataMessage,
   onConnectionState,
   token,
@@ -27,12 +27,19 @@ export function createWebRTCAdapter({
   let pc = null;
   let dataChannel = null;
   let iceCandidateBuffer = [];
+  let makingOffer = false;
+  let isPolite = false;
+  let remoteStream = null;
 
   async function init() {
     if (pc) {
       pc.close();
       pc = null;
     }
+
+    makingOffer = false;
+    isPolite = false;
+    remoteStream = new MediaStream();
 
     const iceServers = await fetchIceServers();
     pc = new RTCPeerConnection({ iceServers });
@@ -45,9 +52,21 @@ export function createWebRTCAdapter({
       setupDataChannel(dataChannel);
     };
 
+    // Perfect Negotiation: автоматический offer при изменении медиа
+    pc.onnegotiationneeded = async () => {
+      try {
+        makingOffer = true;
+        await pc.setLocalDescription();
+        onLocalDescription({ type: "offer", sdp: pc.localDescription.sdp });
+      } catch (e) {
+        console.error("onnegotiationneeded error:", e);
+      } finally {
+        makingOffer = false;
+      }
+    };
+
     pc.onicecandidate = (e) => {
       if (!e.candidate) return;
-      console.log("ICE", e.candidate.candidate);
       if (!pc.remoteDescription) {
         iceCandidateBuffer.push(e.candidate);
       } else {
@@ -55,11 +74,11 @@ export function createWebRTCAdapter({
       }
     };
 
+    // Собираем remoteStream вручную — e.streams[0] пустой при recvonly
     pc.ontrack = (e) => {
-      console.log("ONTRACK:", e.track.kind, "streams:", e.streams.length); // TODO: удалить
-      if (e.streams && e.streams[0]) {
-        onRemoteStream(e.streams[0]);
-      }
+      console.log("ONTRACK:", e.track.kind);
+      remoteStream.addTrack(e.track);
+      onRemoteStream(remoteStream);
     };
 
     pc.onconnectionstatechange = () => {
@@ -80,7 +99,6 @@ export function createWebRTCAdapter({
               pair.state === "succeeded" &&
               pair.nominated
             ) {
-              console.log("ACTIVE PAIR", pair);
               let localCandidate = null;
               let remoteCandidate = null;
               report.forEach((r) => {
@@ -102,7 +120,6 @@ export function createWebRTCAdapter({
     channel.onopen = () => onDataMessage({ type: "channel_open" });
     channel.onclose = () => onDataMessage({ type: "channel_close" });
     channel.onmessage = (e) => {
-      console.log("RAW MESSAGE RECEIVED", e.data);
       try {
         const msg = JSON.parse(e.data);
         if (msg.type === "file_meta") {
@@ -130,30 +147,42 @@ export function createWebRTCAdapter({
 
   function addTracks(stream) {
     if (!stream || !pc) return;
-    console.log("TRACKS:", stream.getTracks().map(t => t.kind + ":" + t.enabled)); // TODO: удалить
     stream.getTracks().forEach((t) => pc.addTrack(t, stream));
+    // addTrack триггерит onnegotiationneeded автоматически
   }
 
-  async function createOffer() {
-    const offer = await pc.createOffer();
-    await pc.setLocalDescription(offer);
-    return offer.sdp;
+  // Вызывается если нет камеры — гарантирует что SDP содержит медиа секции
+  function ensureReceive() {
+    if (!pc) return;
+    pc.addTransceiver("video", { direction: "recvonly" });
+    pc.addTransceiver("audio", { direction: "recvonly" });
+    // addTransceiver триггерит onnegotiationneeded автоматически
+  }
+
+  // Устанавливает роль для Perfect Negotiation
+  function setRole(role) {
+    isPolite = role === "polite";
+    console.log("ROLE:", role, "isPolite:", isPolite);
   }
 
   async function handleOffer(sdpStr) {
-    await pc.setRemoteDescription(
-      new RTCSessionDescription({ type: "offer", sdp: sdpStr }),
-    );
-    const answer = await pc.createAnswer();
-    await pc.setLocalDescription(answer);
+    const offerCollision =
+      makingOffer || pc.signalingState !== "stable";
+
+    if (!isPolite && offerCollision) {
+      console.warn("Impolite: ignoring colliding offer");
+      return;
+    }
+
+    await pc.setRemoteDescription({ type: "offer", sdp: sdpStr });
+    await pc.setLocalDescription();
     flushIceBuffer();
-    return answer.sdp;
+    // answer уходит через onnegotiationneeded? Нет — answer генерируем здесь
+    onLocalDescription({ type: "answer", sdp: pc.localDescription.sdp });
   }
 
   async function handleAnswer(sdpStr) {
-    await pc.setRemoteDescription(
-      new RTCSessionDescription({ type: "answer", sdp: sdpStr }),
-    );
+    await pc.setRemoteDescription({ type: "answer", sdp: sdpStr });
     flushIceBuffer();
   }
 
@@ -178,22 +207,25 @@ export function createWebRTCAdapter({
   }
 
   async function sendFile(file) {
-    console.log("SEND FILE START", file.name);
     const chunkSize = 16 * 1024;
     const id = crypto.randomUUID();
-    dataChannel.send(JSON.stringify({ type: "file_meta", id, name: file.name, size: file.size }));
+    dataChannel.send(
+      JSON.stringify({ type: "file_meta", id, name: file.name, size: file.size })
+    );
     let offset = 0;
     while (offset < file.size) {
       const chunk = file.slice(offset, offset + chunkSize);
       const buffer = await chunk.arrayBuffer();
-      dataChannel.send(JSON.stringify({
-        type: "file_chunk", id,
-        chunk: Array.from(new Uint8Array(buffer)),
-      }));
+      dataChannel.send(
+        JSON.stringify({
+          type: "file_chunk",
+          id,
+          chunk: Array.from(new Uint8Array(buffer)),
+        })
+      );
       offset += chunkSize;
     }
     dataChannel.send(JSON.stringify({ type: "file_end", id }));
-    console.log("SEND CHUNK", offset);
   }
 
   async function getStats() {
@@ -203,20 +235,39 @@ export function createWebRTCAdapter({
 
   function close() {
     iceCandidateBuffer = [];
+    remoteStream = null;
+    makingOffer = false;
+    isPolite = false;
     if (dataChannel) { dataChannel.close(); dataChannel = null; }
     if (pc) { pc.close(); pc = null; }
+  }
+
+// Явный триггер negotiation — нужен когда треки добавлены до появления remote peer
+  async function triggerNegotiation() {
+    if (!pc) return;
+    try {
+      makingOffer = true;
+      await pc.setLocalDescription();
+      onLocalDescription({ type: "offer", sdp: pc.localDescription.sdp });
+    } catch (e) {
+      console.error("triggerNegotiation error:", e);
+    } finally {
+      makingOffer = false;
+    }
   }
 
   return {
     init,
     addTracks,
-    createOffer,
+    ensureReceive,
+    setRole,
     handleOffer,
     handleAnswer,
     handleIceCandidate,
     sendData,
     getStats,
     sendFile,
+    triggerNegotiation,
     close,
   };
 }

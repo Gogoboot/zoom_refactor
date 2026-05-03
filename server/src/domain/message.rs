@@ -139,6 +139,8 @@ pub enum ServerMessage {
         participants: Vec<ParticipantInfo>,
         /// Идентификатор текущего участника (для удобства клиента).
         participant_id: String,
+        /// Роль для Perfect Negotiation: всегда "polite" для входящего
+        role: String,
     },
 
     /// Уведомление всем участникам: в комнату вошёл новый участник.
@@ -147,6 +149,7 @@ pub enum ServerMessage {
     ParticipantJoined {
         /// Информация о новом участнике.
         participant: ParticipantInfo,
+        role: String,
     },
 
     /// Уведомление всем участникам: участник покинул комнату.
