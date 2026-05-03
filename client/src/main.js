@@ -835,6 +835,6 @@ if (roomIdFromUrl) {
 }
 
 window.sendTestFile = async (file) => {
-  if (!webrtc) return console.log("нет webrtc");
-  await webrtc.sendFile(file);
+  if (!fileTransfer) return console.log("нет fileTransfer");
+  await fileTransfer.send(file);
 };
