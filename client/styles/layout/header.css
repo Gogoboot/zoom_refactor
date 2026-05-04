@@ -112,7 +112,7 @@
 @media (max-width: 768px) {
   /* Уменьшаем высоту шапки */
   .header {
-    display: none;
+    display: none !important;
     /* height: 44px;
     padding: 0 12px; */
   }
