@@ -110,6 +110,33 @@
    МОБИЛЬНАЯ ШАПКА — компактнее
    ========================================== */
 @media (max-width: 768px) {
+
+/* ─── Статус — glassmorphism подсветка ─────────────── */
+.server-status {
+  padding: 4px 10px;
+  border-radius: var(--radius-lg);
+  border: 1px solid transparent;
+  transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
+}
+
+.status-connected {
+  background: rgba(0, 200, 100, 0.12);
+  border-color: rgba(0, 200, 100, 0.3);
+  box-shadow: 0 0 12px rgba(0, 200, 100, 0.15);
+}
+
+.status-connecting {
+  background: rgba(255, 180, 0, 0.12);
+  border-color: rgba(255, 180, 0, 0.3);
+  box-shadow: 0 0 12px rgba(255, 180, 0, 0.15);
+}
+
+.status-error {
+  background: rgba(255, 60, 60, 0.12);
+  border-color: rgba(255, 60, 60, 0.3);
+  box-shadow: 0 0 12px rgba(255, 60, 60, 0.15);
+}
+
   /* Уменьшаем высоту шапки */
   .header {
     display: none !important;
