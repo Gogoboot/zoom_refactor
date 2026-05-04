@@ -128,6 +128,11 @@ const els = {
   saveServerBtn: $("saveServerBtn"),
   connectBtn: $("connectBtn"),
 
+  // Мобильный статус
+  mobileStatus: $("mobileStatus"),
+  mobileStatusDot: document.querySelector(".mobile-status__dot"),
+  mobileStatusTooltip: document.querySelector(".mobile-status__tooltip"),
+
   // Модальное окно
   errorModal: $("errorModal"),
   modalTitle: $("modalTitle"),
@@ -217,6 +222,18 @@ const shareModal = createShareModal({
 // ==========================================
 // 4. ВСПОМОГАТЕЛЬНЫЕ UI ФУНКЦИИ
 // ==========================================
+
+// Тултип мобильного статуса
+els.mobileStatusDot.addEventListener("click", () => {
+  els.mobileStatusTooltip.classList.toggle("hidden");
+});
+
+document.addEventListener("click", (e) => {
+  if (!els.mobileStatus.contains(e.target)) {
+    els.mobileStatusTooltip.classList.add("hidden");
+  }
+});
+
 function addStatus(msg, isError = false) {
   const div = document.createElement("div");
   div.className = isError ? "log-item error" : "log-item system";
@@ -239,20 +256,22 @@ function updateServerStatus(status, text) {
   const dot = els.serverStatus.querySelector(".dot");
   const txt = els.serverStatus.querySelector(".text");
   const map = {
-    connected: { cls: "status-connected", icon: "🟢", txt: "Подключено" },
-    connecting: { cls: "status-connecting", icon: "🟡", txt: "Подключение..." },
-    reconnecting: {
-      cls: "status-connecting",
-      icon: "🔄",
-      txt: "Переподключение...",
-    },
-    error: { cls: "status-error", icon: "🔴", txt: "Ошибка" },
-    disconnected: { cls: "", icon: "⚪", txt: "Отключено" },
+    connected: { cls: "status-connected", icon: "🟢", txt: "Подключено", mobileCls: "mobile-status--connected" },
+    connecting: { cls: "status-connecting", icon: "🟡", txt: "Подключение...", mobileCls: "mobile-status--connecting" },
+    reconnecting: { cls: "status-connecting", icon: "🔄", txt: "Переподключение...", mobileCls: "mobile-status--connecting" },
+    error: { cls: "status-error", icon: "🔴", txt: "Ошибка", mobileCls: "mobile-status--error" },
+    disconnected: { cls: "", icon: "⚪", txt: "Отключено", mobileCls: "" },
   };
   const cfg = map[status] || map.disconnected;
+
+  // Десктоп статус
   els.serverStatus.className = `server-status ${cfg.cls}`;
   dot.textContent = cfg.icon;
   txt.textContent = text || cfg.txt;
+
+  // Мобильный статус — точка
+  els.mobileStatus.className = `mobile-status ${cfg.mobileCls}`;
+  els.mobileStatusTooltip.textContent = text || cfg.txt;
 }
 
 function enableRoomButtons(isInRoom) {

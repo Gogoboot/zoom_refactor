@@ -155,3 +155,64 @@
     display: none;
   }
 }
+
+/* ─── Мобильный статус подключения ─────────────────── */
+.mobile-status {
+  display: none; /* скрыт на десктопе */
+}
+
+@media (max-width: 768px) {
+  .mobile-status {
+    display: block;
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 20;
+  }
+
+  .mobile-status__dot {
+    display: block;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    cursor: pointer;
+    transition: background 0.3s, box-shadow 0.3s;
+  }
+
+  /* Цвета точки по статусу */
+  .mobile-status--connected .mobile-status__dot {
+    background: rgba(0, 200, 100, 1);
+    box-shadow: 0 0 8px rgba(0, 200, 100, 0.6);
+  }
+
+  .mobile-status--connecting .mobile-status__dot {
+    background: rgba(255, 180, 0, 1);
+    box-shadow: 0 0 8px rgba(255, 180, 0, 0.6);
+  }
+
+  .mobile-status--error .mobile-status__dot {
+    background: rgba(255, 60, 60, 1);
+    box-shadow: 0 0 8px rgba(255, 60, 60, 0.6);
+  }
+
+  /* Tooltip */
+  .mobile-status__tooltip {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 4px 10px;
+    font-size: 0.8rem;
+    color: var(--text-primary);
+    white-space: nowrap;
+    backdrop-filter: blur(8px);
+    transition: opacity 0.2s;
+  }
+
+  .mobile-status__tooltip.hidden {
+    display: none;
+  }
+}
