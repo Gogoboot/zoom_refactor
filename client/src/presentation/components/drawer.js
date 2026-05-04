@@ -46,7 +46,13 @@ export function createDrawerComponent({
     requestAnimationFrame(() => {
       const drawerHeight = drawerEl.offsetHeight;
       /* Сохраняем translateX(-50%) и добавляем translateY */
-      controlsBar.style.transform = `translateX(-50%) translateY(-${drawerHeight}px)`;
+if (window.innerWidth <= 768) {
+  controlsBar.style.opacity = "0";
+  controlsBar.style.pointerEvents = "none";
+} else {
+  controlsBar.style.bottom = `${drawerHeight + 80}px`;
+  controlsBar.style.transition = "bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1)";
+}
       controlsBar.style.transition =
         "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)";
     });
@@ -60,7 +66,9 @@ export function createDrawerComponent({
     drawerOverlayEl.classList.remove("drawer-overlay--visible");
 
     /* Возвращаем translateX(-50%) на место */
-    controlsBar.style.transform = "translateX(-50%) translateY(0)";
+controlsBar.style.opacity = "1";
+controlsBar.style.pointerEvents = "auto";
+controlsBar.style.bottom = "80px";
   }
 
   function toggle() {

@@ -73,3 +73,33 @@
     from { transform: scale(0.85); opacity: 0; }
     to   { transform: scale(1);    opacity: 1; }
 }
+
+/* Share modal */
+.share-link-group {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.share-link-input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .share-link-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .share-link-input {
+    width: 100%;
+  }
+}
