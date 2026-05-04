@@ -131,4 +131,8 @@
   .chat-messages {
     overflow-y: auto;
   }
+
+  .chat-input-group {
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 16px));
+  }
 }
