@@ -112,8 +112,9 @@
 @media (max-width: 768px) {
   /* Уменьшаем высоту шапки */
   .header {
-    height: 44px;
-    padding: 0 12px;
+    display: none;
+    /* height: 44px;
+    padding: 0 12px; */
   }
 
   /* Скрываем подпись "powered by Rust" — не нужна на мобильном */

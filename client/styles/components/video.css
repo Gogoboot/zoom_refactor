@@ -124,15 +124,12 @@
   /* Controls-bar поверх видео — абсолютное позиционирование уже есть,
        просто поднимаем z-index и убираем белый фон снизу */
   .controls-bar {
-    background: rgba(0, 0, 0, 0.5); /* полупрозрачный тёмный фон */
+    background: rgba(0, 0, 0, 0.5);
     border-color: rgba(255, 255, 255, 0.15);
     backdrop-filter: blur(12px);
-        /* ✅ Изменяем эти строки: */
-    bottom: 10px;             /* Чуть поднимаем от края */
-    margin-bottom: 0;         /* Убираем авто-марджин */
-    
-    /* ✅ Добавляем безопасную зону для iPhone/Android */
-    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+    bottom: calc(16px + env(safe-area-inset-bottom));
+    margin-bottom: 0;
+    padding-bottom: 12px;
   }
 
   /* Скрываем полный экран — на мобильном не нужен */
