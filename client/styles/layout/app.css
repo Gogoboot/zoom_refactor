@@ -42,8 +42,16 @@ body {
    МОБИЛЬНЫЙ LAYOUT — до 768px
    ========================================== */
 @media (max-width: 768px) {
+  html,
+  body {
+    height: 100dvh;
+    overflow: hidden;
+  }
+
   /* Убираем все отступы — видео до краёв экрана */
   .app {
+    position: fixed;
+    inset: 0;
     padding: 0;
     gap: 0;
     height: 100dvh;
