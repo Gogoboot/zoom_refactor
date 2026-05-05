@@ -64,6 +64,7 @@ body {
 
   .app-container.chat-open {
     flex-direction: column;
+    min-height: calc(100dvh - 60px);
   }
 
   .app-container.chat-open .video-section {
