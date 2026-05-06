@@ -50,7 +50,7 @@ if (window.innerWidth <= 768) {
   controlsBar.style.opacity = "0";
   controlsBar.style.pointerEvents = "none";
 } else {
-  controlsBar.style.bottom = `${drawerHeight + 80}px`;
+  controlsBar.style.bottom = `${drawerHeight}px`;
   controlsBar.style.transition = "bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1)";
 }
       controlsBar.style.transition =
@@ -68,7 +68,8 @@ if (window.innerWidth <= 768) {
     /* Возвращаем translateX(-50%) на место */
 controlsBar.style.opacity = "1";
 controlsBar.style.pointerEvents = "auto";
-controlsBar.style.bottom = "80px";
+// controlsBar.style.bottom = "15px";
+controlsBar.style.bottom = "12px";
   }
 
   function toggle() {
