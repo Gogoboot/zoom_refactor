@@ -83,7 +83,7 @@ body {
   .app-container.chat-open .chat-panel {
     display: flex;
     flex-direction: column;
-    flex: 0 0 40%;
-    min-height: 0;
+    /* flex: 0 0 40%; */
+    min-height: 40%;
   }
 }
