@@ -70,7 +70,7 @@ controlsBar.style.opacity = "1";
 controlsBar.style.pointerEvents = "auto";
 // controlsBar.style.bottom = "15px";
 controlsBar.style.bottom = "12px";
-  }
+}
 
   function toggle() {
     isOpen ? close() : open();
