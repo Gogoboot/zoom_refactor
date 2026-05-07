@@ -68,7 +68,6 @@ if (window.innerWidth <= 768) {
     /* Возвращаем translateX(-50%) на место */
 controlsBar.style.opacity = "1";
 controlsBar.style.pointerEvents = "auto";
-// controlsBar.style.bottom = "15px";
 controlsBar.style.bottom = "12px";
 }
 
