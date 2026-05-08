@@ -2,13 +2,12 @@
    ОСНОВНОЙ LAYOUT — 100vh без скролла
    ========================================== */
 body {
-  /* height: 100vh; */
-  /* overflow: hidden; */
   display: flex;
   flex-direction: column;
 }
 
 .app {
+  max-height: calc(100vh - 52px);
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -54,7 +53,7 @@ body {
     inset: 0;
     padding: 0;
     gap: 0;
-    height: 100dvh;
+    min-height: 100dvh;
   }
 
   /* Убираем отступы у панели комнаты */
@@ -69,6 +68,7 @@ body {
   .app-container {
     border-radius: 0;
     border: none;
+   
   }
 
   .app-container.chat-open {
